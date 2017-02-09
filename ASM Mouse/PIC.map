@@ -1,0 +1,60 @@
+MPLINK 4.49, Linker
+Linker Map File - Created Sat May 10 23:30:37 2014
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000108
+                   .cinit    romdata   0x000084    program   0x000004
+.config_2007_TEST4SENDRECEIVE.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000085      
+                            0x002007    0x002007      
+            135 out of 4359 program addresses used, program memory utilization is 3%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+             CheckButtons   0x000046    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+                    Delay   0x00007f    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             MainReceiver   0x00002b    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+               MainSender   0x000037    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+               OutputCtrl   0x000075    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             ReceiveComms   0x00004f    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+                SendComms   0x00005e    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+               SetChanges   0x00006d    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+                    Start   0x000000    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             _.org_0_003B   0x00003b    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             _.org_0_0051   0x000051    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             _.org_0_0058   0x000058    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             _.org_0_0064   0x000064    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             _.org_0_0067   0x000067    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    Start   0x000000    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             MainReceiver   0x00002b    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+               MainSender   0x000037    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             _.org_0_003B   0x00003b    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             CheckButtons   0x000046    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             ReceiveComms   0x00004f    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             _.org_0_0051   0x000051    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             _.org_0_0058   0x000058    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+                SendComms   0x00005e    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             _.org_0_0064   0x000064    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+             _.org_0_0067   0x000067    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+               SetChanges   0x00006d    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+               OutputCtrl   0x000075    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+                    Delay   0x00007f    program     static C:\Users\Jonathan\Desktop\tech\Test4SendReceive.asm
+
+

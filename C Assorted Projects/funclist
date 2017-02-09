@@ -1,0 +1,16 @@
+___awdiv: CODE, 1440 0 118
+_init_hardware: CODE, 985 0 29
+_move_stop: CODE, 943 0 7
+_move_180: CODE, 1196 0 70
+_ADC_convert: CODE, 1266 0 82
+_main: CODE, 1348 0 92
+_move_forwards_aLittle: CODE, 966 0 19
+_PWM_PID_convert: CODE, 1688 0 165
+_PWM_check: CODE, 1098 0 43
+_servo_on: CODE, 939 0 4
+_servo_off: CODE, 935 0 4
+_PWM_reset: CODE, 1141 0 55
+_PID_controller: CODE, 1558 0 130
+_black_black_check: CODE, 1853 0 195
+___wmul: CODE, 1014 0 42
+Total: 1055

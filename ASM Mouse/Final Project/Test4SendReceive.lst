@@ -1,0 +1,919 @@
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;**********************************************************************
+                      00002 ;                                                                                                       
+                                                                    *
+                      00003 ;       Filename:               Test.asm                                                                
+                                                    *
+                      00004 ;       Date:                                                                                           
+                                                            *
+                      00005 ;       File Version:                                                                                   
+                                                    *
+                      00006 ;                                                                                                       
+                                                                    *
+                      00007 ;       Author:                 Jonathan                                                                
+                                                    *
+                      00008 ;       Company:                                                                                        
+                                                            *
+                      00009 ;                                                                                                       
+                                                                    * 
+                      00010 ;                                                                                                       
+                                                                    *
+                      00011 ;**********************************************************************
+                      00012 ;                                                                                                       
+                                                                    *
+                      00013 ;       Files Required: P16F690.INC                                                                     
+                                            *
+                      00014 ;                                                                                                       
+                                                                    *
+                      00015 ;**********************************************************************
+                      00016 ;                                                                                                       
+                                                                    *
+                      00017 ;       Notes:                                                                                          
+                                                            *
+                      00018 ;               button stat:    hardware, 0=pressed                                                     
+                                    *
+                      00019 ;                                               software vars, 1=unpressed                              
+                                            *
+                      00020 ;               Input Analog light sensor at RB5/AN11
+                      00021 ;               Output Dimming LED at RB6
+                      00022 ;                                                                                                       
+                                                                    *
+                      00023 ;**********************************************************************
+                      00024 ;        _    _     ___     _    _                                                                      
+                                    *
+                      00025 ;       | |  | |   /   \   | |  | |                                                                     
+                                    *
+                      00026 ;       | |  | |  / /'\ \  | |  | |                                                                     
+                                    *
+                      00027 ;       | |__| | | |   | | | |__| |           _  ___                                    *
+                      00028 ;       |      | | |   | | |      |     |\ | / \  |                                             *
+                      00029 ;       '""""| | | |   | | '""""| |     | \| \_/  |                                             *
+                      00030 ;            | | | |   | |      | |   _  _            _                                 *
+                      00031 ;            | | | \   | |      | |  |_ / \ | | |\ | | \                                *
+                      00032 ;            | |  \ \_/ /       | |  |  \_/ \_/ | \| |_/                                *
+                      00033 ;            | |   \   /        | |                                                                     
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                                    *
+                      00034 ;            '"'    '"'         '"'                                                                     
+                                    *
+                      00035 ;                                                                                                       
+                                                                    *
+                      00036 ;**********************************************************************
+                      00037 
+                      00038 
+                      00039         list            p=16f690                ; list directive to define processor
+                      00040         #include <p16F690.inc>
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ;  MPASM PIC16F690 processor include
+                      00005 ; 
+                      00006 ;  (c) Copyright 1999-2013 Microchip Technology, All rights reserved
+                      00007 ;==========================================================================
+                      00008 
+                      00756         LIST
+2007   30D4           00041         __config (_INTRC_OSC_NOCLKOUT & _WDT_OFF & _PWRTE_OFF & _MCLRE_OFF & _CP_OFF & _BOR_OFF & _IESO_
+                            OFF & _FCMEN_OFF)
+                      00042 
+                      00043         cblock 0x20
+  00000020            00044 Delay1                                          ; Assign an address to label Delay1
+  00000021            00045 Delay2
+                      00046 
+  00000022            00047 ButtonStat                                      ; Bit0 = RA5, Bit1 = RA4, 1 = unpressed
+                      00048 
+  00000023            00049 VarOut                                          ; define a variable to hold the diplay
+  00000024            00050 ANLumi
+                      00051 
+  00000025            00052 Send_NotReceive
+  00000026            00053 DataSend
+  00000027            00054 DataReceive
+  00000028            00055 ByteLength
+  00000029            00056 PortCStat
+  0000002A            00057 PortBStat
+  0000002B            00058 DutyTotal
+  0000002C            00059 Duty0
+  0000002D            00060 Duty1
+  0000002E            00061 Duty2
+  0000002F            00062 DutyRB4
+                      00063 
+                      00064         endc
+                      00065         
+                      00066         org 0
+                      00067 
+0000                  00068 Start:
+0000   30FF           00069         movlw           0xFF
+0001   1683 1303      00070         banksel         OSCCON                                          ; set CPU speed
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0003   160F           00071         bsf                     OSCCON, IRCF0                           
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0004   168F           00072         bsf                     OSCCON, IRCF1                           
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0005   170F           00073         bsf                     OSCCON, IRCF2                           
+0006   1683 1303      00074         banksel         TRISA
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0008   0085           00075         movwf           TRISA                                           ; set PORT A to input
+                      00076         
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0009   1505           00077         bsf                     TRISA, 2                                        ; RA2 = clock in
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000A   1485           00078         bsf                     TRISA, 1                                        ; RA1 = data in
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000B   1386           00079         bcf                     TRISB, 7                                        ; RB7 = clock out
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000C   1306           00080         bcf                     TRISB, 6                                        ; RB6 = data out
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000D   1206           00081         bcf                     TRISB, 4
+                      00082         
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000E   1686           00083         bsf                     TRISB, 5                                        ; set RB5 to input (anal
+                            og later)
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000F   1306           00084         bcf                     TRISB, 6                                        ; set RB6 to output
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0010   0187           00085         clrf            TRISC                                           ; set PORT C to output
+                      00086         
+0011   1283 1303      00087         banksel         ADCON0                                          
+0013   019F           00088         clrf            ADCON0                                          ; clear junk
+0014   302D           00089         movlw           b'00101101'                                     ; turn ADC on
+0015   009F           00090         movwf           ADCON0
+0016   1283 1703      00091         banksel         ANSEL
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0018   019E           00092         clrf            ANSEL
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0019   019F           00093         clrf            ANSELH
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001A   159F           00094         bsf                     ANSELH, 3                                       ; set RB5/AN11 to analog
+                      00095         
+001B   1283 1303      00096         banksel         PORTC
+001D   0187           00097         clrf            PORTC
+001E   0186           00098         clrf            PORTB
+                      00099         
+                      00100 ;       bcf                     STATUS, RP0
+                      00101 ;       bcf                     STATUS, RP1
+001F   1283 1303      00102         banksel         ADCON0                                          ; BANK 0
+                      00103 
+0021   01A3           00104         clrf            VarOut
+0022   01A4           00105         clrf            ANLumi
+0023   1003           00106         bcf                     STATUS, C                                       ; clear Carry bit
+0024   01A6           00107         clrf            DataSend
+0025   01A7           00108         clrf            DataReceive
+                      00109         
+0026   1025           00110         bcf                     Send_NotReceive, 0                      ; 1=Sender Main, 0=Receiver Main
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00111         
+0027   1C25           00112         btfss           Send_NotReceive, 0
+0028   2???           00113         goto            MainReceiver
+0029   1825           00114         btfsc           Send_NotReceive, 0
+002A   2???           00115         goto            MainSender
+                      00116         
+                      00117         
+                      00118 
+002B                  00119 MainReceiver:
+002B   0103           00120         clrw
+                      00121 
+002C   3008           00122         movlw           .8
+002D   00A8           00123         movwf           ByteLength
+002E   2???           00124         call            ReceiveComms
+                      00125         
+002F   0827           00126         movf            DataReceive, w
+0030   0087           00127         movwf           PORTC
+0031   00AF           00128         movwf           DutyRB4
+                      00129         
+0032   30FF           00130         movlw           .255
+0033   00AB           00131         movwf           DutyTotal
+                      00132         
+0034   1606           00133         bsf                     PORTB, 4
+0035   2???           00134         call            OutputCtrl
+                      00135         
+0036   2???           00136         goto            MainReceiver
+                      00137 
+0037                  00138 MainSender:
+0037   0103           00139         clrw
+                      00140         
+                      00141 ;       call            CheckButtons
+                      00142         
+0038   1C9F           00143         btfss           ADCON0, GO                                      ; analog reading
+0039   149F           00144         bsf                     ADCON0, GO
+003A   189F           00145         btfsc           ADCON0, GO
+003B   2???           00146         goto            $-1
+003C   2???           00147         call            SetChanges
+                      00148         
+                      00149         
+003D   30FF           00150         movlw           .255
+003E   00AB           00151         movwf           DutyTotal
+                      00152         
+003F   0824           00153         movf            ANLumi, w                                       
+0040   0087           00154         movwf           PORTC
+                      00155         
+                      00156                 
+0041   00A6           00157         movwf           DataSend
+0042   3008           00158         movlw           .8
+0043   00A8           00159         movwf           ByteLength
+0044   2???           00160         call            SendComms
+                      00161         
+0045   2???           00162         goto            MainSender
+                      00163 
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0046                  00164 CheckButtons:                                                           
+0046   1A85           00165         btfsc           PORTA, 5                                        ; RA5
+0047   1022           00166         bcf                     ButtonStat, 0                           ; If unpressed, set as 0
+0048   1E85           00167         btfss           PORTA, 5
+0049   1422           00168         bsf                     ButtonStat, 0                           ; If pressed, set as 1
+                      00169         
+004A   1A05           00170         btfsc           PORTA, 4                                        ; RA4
+004B   10A2           00171         bcf                     ButtonStat, 1                           ;
+004C   1E05           00172         btfss           PORTA, 4
+004D   14A2           00173         bsf                     ButtonStat, 1
+                      00174         
+004E   0008           00175         return
+                      00176         
+004F                  00177 ReceiveComms:
+004F   0DA7           00178         rlf                     DataReceive, f                          ; shift bits first
+0050   1D05           00179         btfss           PORTA, 2                                        ; wait for clock to on / byte se
+                            nt
+0051   2???           00180         goto            $-1
+                      00181         
+0052   1C85           00182         btfss           PORTA, 1                                        ; copy received data to rightmos
+                            t bit
+0053   1027           00183         bcf                     DataReceive, 0
+0054   1885           00184         btfsc           PORTA, 1
+0055   1427           00185         bsf                     DataReceive, 0
+                      00186         
+0056   1786           00187         bsf                     PORTB, 7                                        ; set acknowledge bit
+                      00188         
+0057   1905           00189         btfsc           PORTA, 2                                        ; wait for sender to reset
+0058   2???           00190         goto            $-1
+0059   1386           00191         bcf                     PORTB, 7                                        ; acknowledge reset
+                      00192         
+005A   1003           00193         bcf                     STATUS, C
+Message[305]: Using default destination of 1 (file).
+005B   0BA8           00194         decfsz          ByteLength
+005C   2???           00195         goto            ReceiveComms
+005D   0008           00196         return                                          
+                      00197         
+                      00198         
+005E                  00199 SendComms:
+005E   1786           00200         bsf                     PORTB, 7                                        ; turn comm clock on
+                      00201         
+005F   1FA6           00202         btfss           DataSend, 7                                     ; send leftmost bit
+0060   1306           00203         bcf                     PORTB, 6
+0061   1BA6           00204         btfsc           DataSend, 7
+0062   1706           00205         bsf                     PORTB, 6
+                      00206         
+0063   1D05           00207         btfss           PORTA, 2                                        ; wait for data recieved to be r
+                            ecognized
+0064   2???           00208         goto            $-1
+0065   1386           00209         bcf                     PORTB, 7                                        ; turn comm clock off, r
+                            ecieve acknowledged
+0066   1905           00210         btfsc           PORTA, 2                                        ; wait for clock off to be ackno
+                            wledged
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0067   2???           00211         goto            $-1
+                      00212         
+0068   0DA6           00213         rlf                     DataSend, f
+0069   1003           00214         bcf                     STATUS, C
+Message[305]: Using default destination of 1 (file).
+006A   0BA8           00215         decfsz          ByteLength
+006B   2???           00216         goto            SendComms
+006C   0008           00217         return
+                      00218         
+006D                  00219 SetChanges:
+006D   081E           00220         movf            ADRESH, w
+                      00221 ;       sublw           .255
+                      00222         
+                      00223         
+006E   3C80           00224         sublw           .128
+006F   00A4           00225         movwf           ANLumi
+0070   13A4           00226         bcf                     ANLumi, 7
+0071   0DA4           00227         rlf                     ANLumi, 1
+0072   0824           00228         movf            ANLumi, w
+                      00229         
+                      00230 ;       sublw           .255
+                      00231 ;       movwf           VarOut
+                      00232         
+0073   00AF           00233         movwf           DutyRB4
+                      00234         
+0074   0008           00235         return
+                      00236         
+0075                  00237 OutputCtrl:                                                                     ; cycles 255 = 1 frame
+                      00238 
+0075   01AA           00239         clrf            PortBStat                                       ; clear all
+Message[305]: Using default destination of 1 (file).
+0076   0BAF           00240         decfsz          DutyRB4
+0077   162A           00241         bsf                     PortBStat, 4                                    ; set if DutyOn not done
+                      00242                                                                                                 ; ie: if
+                             it is done, variable is kept off
+                      00243                                                                                                 ; when v
+                            ariable is off, then LED turns off
+                      00244         
+0078   1E2A           00245         btfss           PortBStat, 4
+0079   1206           00246         bcf                     PORTB, 4                                                ; turn LED off w
+                            hen DutyOn done
+007A   1E2A           00247         btfss           PortBStat, 4                                    ; **DON"T NEED** LED never turne
+                            d back on, so doesn't matter if set back up
+Message[305]: Using default destination of 1 (file).
+007B   0AAF           00248         incf            DutyRB4
+                      00249                         
+Message[305]: Using default destination of 1 (file).
+007C   0BAB           00250         decfsz          DutyTotal
+007D   2???           00251         goto            OutputCtrl
+007E   0008           00252         return
+                      00253         
+                      00254 
+007F                  00255 Delay:
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+007F   0BA0           00256         decfsz          Delay1,f                                        ; Delay1 = Delay1 - 1  
+0080   2???           00257         goto            Delay                                           ; The Inner loop takes 3 instruc
+                            tions per loop * 256 loopss = 768 instructions
+                      00258         
+0081   0BA1           00259         decfsz          Delay2,f                                        ; Delay2 = Delay2 - 1
+0082   2???           00260         goto            Delay                                           ; (768+3) * 256 = 197376 instruc
+                            tions / 1M instructions per second = 0.197 sec.
+                      00261         
+0083   0008           00262         return
+                      00263 
+30D4                  00264         end
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ABDEN                             00000000
+ABDOVF                            00000007
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000004
+ADCS1                             00000005
+ADCS2                             00000006
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ANLumi                            00000024
+ANS0                              00000000
+ANS1                              00000001
+ANS10                             00000002
+ANS11                             00000003
+ANS2                              00000002
+ANS3                              00000003
+ANS4                              00000004
+ANS5                              00000005
+ANS6                              00000006
+ANS7                              00000007
+ANS8                              00000000
+ANS9                              00000001
+ANSEL                             0000011E
+ANSELH                            0000011F
+BAUDCTL                           0000009B
+BF                                00000000
+BRG0                              00000000
+BRG1                              00000001
+BRG10                             00000002
+BRG11                             00000003
+BRG12                             00000004
+BRG13                             00000005
+BRG14                             00000006
+BRG15                             00000007
+BRG16                             00000003
+BRG2                              00000002
+BRG3                              00000003
+BRG4                              00000004
+BRG5                              00000005
+BRG6                              00000006
+BRG7                              00000007
+BRG8                              00000000
+BRG9                              00000001
+BRGH                              00000002
+ButtonStat                        00000022
+ByteLength                        00000028
+C                                 00000000
+C1CH0                             00000000
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+C1CH1                             00000001
+C1IE                              00000005
+C1IF                              00000005
+C1OE                              00000005
+C1ON                              00000007
+C1OUT                             00000006
+C1POL                             00000004
+C1R                               00000002
+C1SEN                             00000005
+C1VREN                            00000007
+C2CH0                             00000000
+C2CH1                             00000001
+C2IE                              00000006
+C2IF                              00000006
+C2OE                              00000005
+C2ON                              00000007
+C2OUT                             00000006
+C2POL                             00000004
+C2R                               00000002
+C2REN                             00000004
+C2SYNC                            00000000
+C2VREN                            00000006
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCPR                              00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CHS0                              00000002
+CHS1                              00000003
+CHS2                              00000004
+CHS3                              00000005
+CKE                               00000006
+CKP                               00000004
+CM1CON0                           00000119
+CM2CON0                           0000011A
+CM2CON1                           0000011B
+CREN                              00000004
+CSRC                              00000007
+CheckButtons                      00000046
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+DC1B0                             00000004
+DC1B1                             00000005
+D_A                               00000005
+D_NOT_A                           00000005
+DataReceive                       00000027
+DataSend                          00000026
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+Delay                             0000007F
+Delay1                            00000020
+Delay2                            00000021
+Duty0                             0000002C
+Duty1                             0000002D
+Duty2                             0000002E
+DutyRB4                           0000002F
+DutyTotal                         0000002B
+ECCPAS                            0000001D
+ECCPAS0                           00000004
+ECCPAS1                           00000005
+ECCPAS2                           00000006
+ECCPASE                           00000007
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDAT                             0000010C
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GIE                               00000007
+GO                                00000001
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+HTS                               00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IOC                               00000096
+IOC0                              00000000
+IOC1                              00000001
+IOC2                              00000002
+IOC3                              00000003
+IOC4                              00000004
+IOC5                              00000005
+IOCA                              00000096
+IOCA0                             00000000
+IOCA1                             00000001
+IOCA2                             00000002
+IOCA3                             00000003
+IOCA4                             00000004
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+IOCA5                             00000005
+IOCB                              00000116
+IOCB4                             00000004
+IOCB5                             00000005
+IOCB6                             00000006
+IOCB7                             00000007
+IRCF0                             00000004
+IRCF1                             00000005
+IRCF2                             00000006
+IRP                               00000007
+LTS                               00000001
+MC1OUT                            00000007
+MC2OUT                            00000006
+MSK                               00000093
+MSK0                              00000000
+MSK1                              00000001
+MSK2                              00000002
+MSK3                              00000003
+MSK4                              00000004
+MSK5                              00000005
+MSK6                              00000006
+MSK7                              00000007
+MainReceiver                      0000002B
+MainSender                        00000037
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BOR                           00000000
+NOT_DONE                          00000001
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RABPU                         00000007
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OERR                              00000001
+OPTION_REG                        00000081
+OSCCON                            0000008F
+OSCTUNE                           00000090
+OSFIE                             00000007
+OSFIF                             00000007
+OSTS                              00000003
+OutputCtrl                        00000075
+P                                 00000004
+P1M0                              00000006
+P1M1                              00000007
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PDC0                              00000000
+PDC1                              00000001
+PDC2                              00000002
+PDC3                              00000003
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE 12
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PDC4                              00000004
+PDC5                              00000005
+PDC6                              00000006
+PEIE                              00000006
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PR2                               00000092
+PRSEN                             00000007
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSSAC0                            00000002
+PSSAC1                            00000003
+PSSBD0                            00000000
+PSSBD1                            00000001
+PSTRCON                           0000019D
+PULSR                             00000002
+PULSS                             00000003
+PWM1CON                           0000001C
+PortBStat                         0000002A
+PortCStat                         00000029
+R                                 00000002
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RABIE                             00000003
+RABIF                             00000000
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RC0                               00000000
+RC1                               00000001
+RC2                               00000002
+RC3                               00000003
+RC4                               00000004
+RC5                               00000005
+RC6                               00000006
+RC7                               00000007
+RCIDL                             00000006
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE 13
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RD                                00000000
+READ_WRITE                        00000002
+RP0                               00000005
+RP1                               00000006
+RX9                               00000006
+RX9D                              00000000
+R_NOT_W                           00000002
+R_W                               00000002
+ReceiveComms                      0000004F
+S                                 00000003
+SBOREN                            00000004
+SCKP                              00000004
+SCS                               00000000
+SENB                              00000003
+SENDB                             00000003
+SMP                               00000007
+SPBRG                             00000099
+SPBRGH                            0000009A
+SPEN                              00000007
+SR0                               00000006
+SR1                               00000007
+SRCON                             0000019E
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPMSK                            00000093
+SSPOV                             00000006
+SSPSTAT                           00000094
+STATUS                            00000003
+STRA                              00000000
+STRB                              00000001
+STRC                              00000002
+STRD                              00000003
+STRSYNC                           00000004
+SWDTEN                            00000000
+SYNC                              00000004
+SendComms                         0000005E
+Send_NotReceive                   00000025
+SetChanges                        0000006D
+Start                             00000000
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE 14
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+T1CKPS1                           00000005
+T1CON                             00000010
+T1GINV                            00000007
+T1GSS                             00000001
+T1IE                              00000000
+T1IF                              00000000
+T1OSCEN                           00000003
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+T2IE                              00000001
+T2IF                              00000001
+TMR0                              00000001
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1GE                            00000006
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISB                             00000086
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRISC                             00000087
+TRISC0                            00000000
+TRISC1                            00000001
+TRISC2                            00000002
+TRISC3                            00000003
+TRISC4                            00000004
+TRISC5                            00000005
+TRISC6                            00000006
+TRISC7                            00000007
+TRMT                              00000001
+TUN0                              00000000
+TUN1                              00000001
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE 15
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TUN2                              00000002
+TUN3                              00000003
+TUN4                              00000004
+TX9                               00000006
+TX9D                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+UA                                00000001
+ULPWUE                            00000005
+VCFG                              00000006
+VP6EN                             00000004
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             00000118
+VRR                               00000005
+VarOut                            00000023
+W                                 00000000
+WCOL                              00000007
+WDTCON                            00000097
+WDTPS0                            00000001
+WDTPS1                            00000002
+WDTPS2                            00000003
+WDTPS3                            00000004
+WPU                               00000095
+WPU0                              00000000
+WPU1                              00000001
+WPU2                              00000002
+WPU4                              00000004
+WPU5                              00000005
+WPUA                              00000095
+WPUA0                             00000000
+WPUA1                             00000001
+WPUA2                             00000002
+WPUA4                             00000004
+WPUA5                             00000005
+WPUB                              00000115
+WPUB4                             00000004
+WPUB5                             00000005
+WPUB6                             00000006
+WPUB7                             00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+WUE                               00000001
+Z                                 00000002
+_.org_0_003B                      0000003B
+_.org_0_0051                      00000051
+_.org_0_0058                      00000058
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE 16
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_.org_0_0064                      00000064
+_.org_0_0067                      00000067
+_BOD_NSLEEP                       00003EFF
+_BOD_OFF                          00003CFF
+_BOD_ON                           00003FFF
+_BOD_SBODEN                       00003DFF
+_BOREN_NSLEEP                     00003EFF
+_BOREN_OFF                        00003CFF
+_BOREN_ON                         00003FFF
+_BOREN_SBODEN                     00003DFF
+_BOR_NSLEEP                       00003EFF
+_BOR_OFF                          00003CFF
+_BOR_ON                           00003FFF
+_BOR_SBODEN                       00003DFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003F7F
+_CP_OFF                           00003FFF
+_CP_ON                            00003FBF
+_DEVID1                           00002006
+_EC_OSC                           00003FFB
+_EXTRC                            00003FFF
+_EXTRCIO                          00003FFE
+_EXTRC_OSC_CLKOUT                 00003FFF
+_EXTRC_OSC_NOCLKOUT               00003FFE
+_FCMEN_OFF                        000037FF
+_FCMEN_ON                         00003FFF
+_FOSC_EC                          00003FFB
+_FOSC_EXTRCCLK                    00003FFF
+_FOSC_EXTRCIO                     00003FFE
+_FOSC_HS                          00003FFA
+_FOSC_INTRCCLK                    00003FFD
+_FOSC_INTRCIO                     00003FFC
+_FOSC_LP                          00003FF8
+_FOSC_XT                          00003FF9
+_HS_OSC                           00003FFA
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_IESO_OFF                         00003BFF
+_IESO_ON                          00003FFF
+_INTOSC                           00003FFD
+_INTOSCIO                         00003FFC
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FF8
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FEF
+_WDTE_OFF                         00003FF7
+_WDTE_ON                          00003FFF
+MPASM  5.51              TEST4SENDRECEIVE.ASM   5-10-2014  23:30:37         PAGE 17
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_WDT_OFF                          00003FF7
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FF9
+__16F690                          00000001
+__DEBUG                           1
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :    20 reported,     0 suppressed
+
+

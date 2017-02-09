@@ -1,0 +1,3489 @@
+
+
+HI-TECH Software PIC LITE Macro Assembler V9.83 build 10920 
+                                                                                               Mon May 27 16:07:16 2013
+
+HI-TECH Software Omniscient Code Generator (Lite mode) build 10920
+     1  0000                     opt subtitle "HI-TECH Software Omniscient Code Generator (Lite mode) build 10920"
+     2                           
+     3                           opt pagewidth 120
+     4                           
+     5                           	opt lm
+     6                           
+     7                           	processor	16F690
+     8                           clrc	macro
+     9                           	bcf	3,0
+    10  0000                     	endm
+    11                           clrz	macro
+    12                           	bcf	3,2
+    13  0000                     	endm
+    14                           setc	macro
+    15                           	bsf	3,0
+    16  0000                     	endm
+    17                           setz	macro
+    18                           	bsf	3,2
+    19  0000                     	endm
+    20                           skipc	macro
+    21                           	btfss	3,0
+    22  0000                     	endm
+    23                           skipz	macro
+    24                           	btfss	3,2
+    25  0000                     	endm
+    26                           skipnc	macro
+    27                           	btfsc	3,0
+    28  0000                     	endm
+    29                           skipnz	macro
+    30                           	btfsc	3,2
+    31  0000                     	endm
+    32  0000                     indf	equ	0
+    33  0000                     indf0	equ	0
+    34  0002                     pc	equ	2
+    35  0002                     pcl	equ	2
+    36  0003                     status	equ	3
+    37  0004                     fsr	equ	4
+    38  0004                     fsr0	equ	4
+    39  0001                     c	equ	1
+    40  0000                     z	equ	0
+    41  000A                     pclath	equ	10
+    42                           # 32 "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+    43                           	psect config,class=CONFIG,delta=2 ;#
+    44                           # 32 "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+    45  2007  F0D4               	dw 0xFFFC & 0xFFF7 & 0xFFFF & 0xFFDF & 0xFFFF & 0xFFFF & 0xFCFF & 0xFBFF & 0xF7FF ;#
+    46                           	FNCALL	_main,_init_hardware
+    47                           	FNCALL	_main,_ADC_convert
+    48                           	FNCALL	_main,_PID_controller
+    49                           	FNCALL	_main,_PWM_PID_convert
+    50                           	FNCALL	_main,_black_black_check
+    51                           	FNCALL	_main,_PWM_reset
+    52                           	FNCALL	_main,_PWM_check
+    53                           	FNCALL	_main,_move_stop
+    54                           	FNCALL	_black_black_check,_move_forwards_aLittle
+    55                           	FNCALL	_black_black_check,_servo_off
+    56                           	FNCALL	_black_black_check,_move_stop
+    57                           	FNCALL	_black_black_check,_servo_on
+    58                           	FNCALL	_black_black_check,_move_180
+    59                           	FNCALL	_move_180,_ADC_convert
+    60                           	FNCALL	_PID_controller,___wmul
+    61                           	FNCALL	_PID_controller,___awdiv
+    62                           	FNCALL	_ADC_convert,___wmul
+    63                           	FNCALL	_ADC_convert,___awdiv
+    64                           	FNROOT	_main
+    65                           	global	_dutyMotorL
+    66                           	global	_dutyMotorR
+    67                           	global	_statMotorL
+    68                           	global	_statMotorR
+    69                           psect	idataBANK0,class=CODE,space=0,delta=2
+    70                           global __pidataBANK0
+    71  03BE                     __pidataBANK0:
+    72                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+    73                           	line	95
+    74                           
+    75                           ;initializer for _dutyMotorL
+    76  03BE  345A               	retlw	05Ah
+    77  03BF  3400               	retlw	0
+    78                           
+    79                           	line	94
+    80                           
+    81                           ;initializer for _dutyMotorR
+    82  03C0  345A               	retlw	05Ah
+    83  03C1  3400               	retlw	0
+    84                           
+    85                           	line	93
+    86                           
+    87                           ;initializer for _statMotorL
+    88  03C2  3401               	retlw	01h
+    89  03C3  3400               	retlw	0
+    90                           
+    91                           	line	92
+    92                           
+    93                           ;initializer for _statMotorR
+    94  03C4  3401               	retlw	01h
+    95  03C5  3400               	retlw	0
+    96                           
+    97                           	global	_D_turn
+    98                           	global	_I_turn
+    99                           	global	_PWMCounter
+   100                           	global	_P_turn
+   101                           	global	_blackBlackCounter
+   102                           	global	_changeCounter
+   103                           	global	_i
+   104                           	global	_integralError
+   105                           	global	_loopExit
+   106                           	global	_pastError
+   107                           	global	_readSensL
+   108                           	global	_readSensR
+   109                           	global	_derivativeError
+   110                           	global	_error
+   111                           	global	_totalTurn
+   112                           	global	_ADCON0
+   113  001F                     _ADCON0	set	31
+   114                           	global	_ADRESH
+   115  001E                     _ADRESH	set	30
+   116                           	global	_PORTA
+   117  0005                     _PORTA	set	5
+   118                           	global	_PORTB
+   119  0006                     _PORTB	set	6
+   120                           	global	_PORTC
+   121  0007                     _PORTC	set	7
+   122                           	global	_CARRY
+   123  0018                     _CARRY	set	24
+   124                           	global	_GIE
+   125  005F                     _GIE	set	95
+   126                           	global	_GO_nDONE
+   127  00F9                     _GO_nDONE	set	249
+   128                           	global	_RA2
+   129  002A                     _RA2	set	42
+   130                           	global	_RB6
+   131  0036                     _RB6	set	54
+   132                           	global	_RC0
+   133  0038                     _RC0	set	56
+   134                           	global	_RC2
+   135  003A                     _RC2	set	58
+   136                           	global	_RC3
+   137  003B                     _RC3	set	59
+   138                           	global	_RC4
+   139  003C                     _RC4	set	60
+   140                           	global	_RC5
+   141  003D                     _RC5	set	61
+   142                           	global	_RC6
+   143  003E                     _RC6	set	62
+   144                           	global	_RC7
+   145  003F                     _RC7	set	63
+   146                           	global	_TRISA
+   147  0085                     _TRISA	set	133
+   148                           	global	_TRISB
+   149  0086                     _TRISB	set	134
+   150                           	global	_TRISC
+   151  0087                     _TRISC	set	135
+   152                           	global	_IRCF0
+   153  047C                     _IRCF0	set	1148
+   154                           	global	_IRCF1
+   155  047D                     _IRCF1	set	1149
+   156                           	global	_IRCF2
+   157  047E                     _IRCF2	set	1150
+   158                           	global	_ANSEL
+   159  011E                     _ANSEL	set	286
+   160                           	global	_ANSELH
+   161  011F                     _ANSELH	set	287
+   162                           	global	_EEADR
+   163  010D                     _EEADR	set	269
+   164                           	global	_EEDATA
+   165  010C                     _EEDATA	set	268
+   166                           	global	_EECON1
+   167  018C                     _EECON1	set	396
+   168                           	global	_EECON2
+   169  018D                     _EECON2	set	397
+   170                           	global	_RD
+   171  0C60                     _RD	set	3168
+   172                           	global	_WR
+   173  0C61                     _WR	set	3169
+   174                           	global	_WREN
+   175  0C62                     _WREN	set	3170
+   176                           	file	"GLaDOS 03-05-13.as"
+   177                           	line	#
+   178                           psect cinit,class=CODE,delta=2
+   179                           global start_initialization
+   180  0420                     start_initialization:
+   181                           
+   182                           psect	bssBANK0,class=BANK0,space=1
+   183                           global __pbssBANK0
+   184  0020                     __pbssBANK0:
+   185  0020                     _D_turn:
+   186  0020                            ds      2
+   187                           
+   188  0022                     _I_turn:
+   189  0022                            ds      2
+   190                           
+   191  0024                     _PWMCounter:
+   192  0024                            ds      2
+   193                           
+   194  0026                     _P_turn:
+   195  0026                            ds      2
+   196                           
+   197  0028                     _blackBlackCounter:
+   198  0028                            ds      2
+   199                           
+   200  002A                     _changeCounter:
+   201  002A                            ds      2
+   202                           
+   203  002C                     _i:
+   204  002C                            ds      2
+   205                           
+   206  002E                     _integralError:
+   207  002E                            ds      2
+   208                           
+   209  0030                     _loopExit:
+   210  0030                            ds      2
+   211                           
+   212  0032                     _pastError:
+   213  0032                            ds      2
+   214                           
+   215  0034                     _readSensL:
+   216  0034                            ds      2
+   217                           
+   218  0036                     _readSensR:
+   219  0036                            ds      2
+   220                           
+   221  0038                     _derivativeError:
+   222  0038                            ds      2
+   223                           
+   224  003A                     _error:
+   225  003A                            ds      2
+   226                           
+   227  003C                     _totalTurn:
+   228  003C                            ds      2
+   229                           
+   230                           psect	dataBANK0,class=BANK0,space=1
+   231                           global __pdataBANK0
+   232  004B                     __pdataBANK0:
+   233                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+   234                           	line	95
+   235  004B                     _dutyMotorL:
+   236  004B                            ds      2
+   237                           
+   238                           psect	dataBANK0
+   239                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+   240                           	line	94
+   241  004D                     _dutyMotorR:
+   242  004D                            ds      2
+   243                           
+   244                           psect	dataBANK0
+   245                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+   246                           	line	93
+   247  004F                     _statMotorL:
+   248  004F                            ds      2
+   249                           
+   250                           psect	dataBANK0
+   251                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+   252                           	line	92
+   253  0051                     _statMotorR:
+   254  0051                            ds      2
+   255                           
+   256                           psect clrtext,class=CODE,delta=2
+   257                           global clear_ram
+   258                           ;	Called with FSR containing the base address, and
+   259                           ;	W with the last address+1
+   260  03B6                     clear_ram:
+   261  03B6  0064               	clrwdt			;clear the watchdog before getting into this loop
+   262  03B7                     clrloop:
+   263  03B7  0180               	clrf	indf		;clear RAM location pointed to by FSR
+   264  03B8  0A84               	incf	fsr,f		;increment pointer
+   265  03B9  0604               	xorwf	fsr,w		;XOR with final address
+   266  03BA  1903               	btfsc	status,2	;have we reached the end yet?
+   267  03BB  3400               	retlw	0		;all done for this memory range, return
+   268  03BC  0604               	xorwf	fsr,w		;XOR again to restore value
+   269  03BD  2BB7               	goto	clrloop		;do the next byte
+   270                           
+   271                           ; Clear objects allocated to BANK0
+   272                           psect cinit,class=CODE,delta=2
+   273  0420  1383               	bcf	status, 7	;select IRP bank0
+   274  0421  3020               	movlw	low(__pbssBANK0)
+   275  0422  0084               	movwf	fsr
+   276  0423  303E               	movlw	low((__pbssBANK0)+01Eh)
+   277  0424  118A  23B6  118A   	fcall	clear_ram
+   278                           ; Initialize objects allocated to BANK0
+   279                           	global __pidataBANK0
+   280                           psect cinit,class=CODE,delta=2
+   281  0427  118A  23BE  118A   	fcall	__pidataBANK0+0		;fetch initializer
+   282  042A  00CB               	movwf	__pdataBANK0+0&07fh		
+   283  042B  118A  23BF  118A   	fcall	__pidataBANK0+1		;fetch initializer
+   284  042E  00CC               	movwf	__pdataBANK0+1&07fh		
+   285  042F  118A  23C0  118A   	fcall	__pidataBANK0+2		;fetch initializer
+   286  0432  00CD               	movwf	__pdataBANK0+2&07fh		
+   287  0433  118A  23C1  118A   	fcall	__pidataBANK0+3		;fetch initializer
+   288  0436  00CE               	movwf	__pdataBANK0+3&07fh		
+   289  0437  118A  23C2  118A   	fcall	__pidataBANK0+4		;fetch initializer
+   290  043A  00CF               	movwf	__pdataBANK0+4&07fh		
+   291  043B  118A  23C3  118A   	fcall	__pidataBANK0+5		;fetch initializer
+   292  043E  00D0               	movwf	__pdataBANK0+5&07fh		
+   293  043F  118A  23C4  118A   	fcall	__pidataBANK0+6		;fetch initializer
+   294  0442  00D1               	movwf	__pdataBANK0+6&07fh		
+   295  0443  118A  23C5  118A   	fcall	__pidataBANK0+7		;fetch initializer
+   296  0446  00D2               	movwf	__pdataBANK0+7&07fh		
+   297                           psect cinit,class=CODE,delta=2
+   298                           global end_of_initialization
+   299                           
+   300                           ;End of C runtime variable initialization code
+   301                           
+   302  0447                     end_of_initialization:
+   303  0447  0183               clrf status
+   304  0448  118A  2D44         ljmp _main	;jump to C main() function
+   305                           psect	cstackCOMMON,class=COMMON,space=1
+   306                           global __pcstackCOMMON
+   307  0070                     __pcstackCOMMON:
+   308                           	global	?_init_hardware
+   309  0070                     ?_init_hardware:	; 0 bytes @ 0x0
+   310                           	global	??_init_hardware
+   311  0070                     ??_init_hardware:	; 0 bytes @ 0x0
+   312                           	global	?_ADC_convert
+   313  0070                     ?_ADC_convert:	; 0 bytes @ 0x0
+   314                           	global	?_PID_controller
+   315  0070                     ?_PID_controller:	; 0 bytes @ 0x0
+   316                           	global	?_PWM_PID_convert
+   317  0070                     ?_PWM_PID_convert:	; 0 bytes @ 0x0
+   318                           	global	??_PWM_PID_convert
+   319  0070                     ??_PWM_PID_convert:	; 0 bytes @ 0x0
+   320                           	global	?_black_black_check
+   321  0070                     ?_black_black_check:	; 0 bytes @ 0x0
+   322                           	global	?_PWM_reset
+   323  0070                     ?_PWM_reset:	; 0 bytes @ 0x0
+   324                           	global	??_PWM_reset
+   325  0070                     ??_PWM_reset:	; 0 bytes @ 0x0
+   326                           	global	?_PWM_check
+   327  0070                     ?_PWM_check:	; 0 bytes @ 0x0
+   328                           	global	??_PWM_check
+   329  0070                     ??_PWM_check:	; 0 bytes @ 0x0
+   330                           	global	?_move_stop
+   331  0070                     ?_move_stop:	; 0 bytes @ 0x0
+   332                           	global	??_move_stop
+   333  0070                     ??_move_stop:	; 0 bytes @ 0x0
+   334                           	global	?_move_forwards_aLittle
+   335  0070                     ?_move_forwards_aLittle:	; 0 bytes @ 0x0
+   336                           	global	??_move_forwards_aLittle
+   337  0070                     ??_move_forwards_aLittle:	; 0 bytes @ 0x0
+   338                           	global	?_servo_off
+   339  0070                     ?_servo_off:	; 0 bytes @ 0x0
+   340                           	global	??_servo_off
+   341  0070                     ??_servo_off:	; 0 bytes @ 0x0
+   342                           	global	?_servo_on
+   343  0070                     ?_servo_on:	; 0 bytes @ 0x0
+   344                           	global	??_servo_on
+   345  0070                     ??_servo_on:	; 0 bytes @ 0x0
+   346                           	global	?_move_180
+   347  0070                     ?_move_180:	; 0 bytes @ 0x0
+   348                           	global	?_main
+   349  0070                     ?_main:	; 0 bytes @ 0x0
+   350                           	global	?___wmul
+   351  0070                     ?___wmul:	; 2 bytes @ 0x0
+   352                           	global	___wmul@multiplier
+   353  0070                     ___wmul@multiplier:	; 2 bytes @ 0x0
+   354  0070                     	ds	2
+   355                           	global	___wmul@multiplicand
+   356  0072                     ___wmul@multiplicand:	; 2 bytes @ 0x2
+   357  0072                     	ds	2
+   358                           	global	??___wmul
+   359  0074                     ??___wmul:	; 0 bytes @ 0x4
+   360                           	global	___wmul@product
+   361  0074                     ___wmul@product:	; 2 bytes @ 0x4
+   362  0074                     	ds	2
+   363                           	global	?___awdiv
+   364  0076                     ?___awdiv:	; 2 bytes @ 0x6
+   365                           	global	___awdiv@divisor
+   366  0076                     ___awdiv@divisor:	; 2 bytes @ 0x6
+   367  0076                     	ds	2
+   368                           	global	___awdiv@dividend
+   369  0078                     ___awdiv@dividend:	; 2 bytes @ 0x8
+   370  0078                     	ds	2
+   371                           	global	??___awdiv
+   372  007A                     ??___awdiv:	; 0 bytes @ 0xA
+   373  007A                     	ds	1
+   374                           	global	??_ADC_convert
+   375  007B                     ??_ADC_convert:	; 0 bytes @ 0xB
+   376                           	global	??_PID_controller
+   377  007B                     ??_PID_controller:	; 0 bytes @ 0xB
+   378  007B                     	ds	2
+   379                           psect	cstackBANK0,class=BANK0,space=1
+   380                           global __pcstackBANK0
+   381  003E                     __pcstackBANK0:
+   382                           	global	___awdiv@counter
+   383  003E                     ___awdiv@counter:	; 1 bytes @ 0x0
+   384  003E                     	ds	1
+   385                           	global	___awdiv@sign
+   386  003F                     ___awdiv@sign:	; 1 bytes @ 0x1
+   387  003F                     	ds	1
+   388                           	global	___awdiv@quotient
+   389  0040                     ___awdiv@quotient:	; 2 bytes @ 0x2
+   390  0040                     	ds	2
+   391                           	global	??_move_180
+   392  0042                     ??_move_180:	; 0 bytes @ 0x4
+   393  0042                     	ds	3
+   394                           	global	??_black_black_check
+   395  0045                     ??_black_black_check:	; 0 bytes @ 0x7
+   396  0045                     	ds	3
+   397                           	global	??_main
+   398  0048                     ??_main:	; 0 bytes @ 0xA
+   399  0048                     	ds	3
+   400 ;;Data sizes: Strings 0, constant 0, data 8, bss 30, persistent 0 stack 0
+   401 ;;Auto spaces:   Size  Autos    Used
+   402 ;; COMMON          14     13      13
+   403 ;; BANK0           80     13      51
+   404 ;; BANK1           80      0       0
+   405 ;; BANK2           80      0       0
+   406                           
+   407 ;;
+   408 ;; Pointer list with targets:
+   409                           
+   410 ;; ?___wmul	unsigned int  size(1) Largest target is 0
+   411 ;;
+   412 ;; ?___awdiv	int  size(1) Largest target is 0
+   413 ;;
+   414                           
+   415                           
+   416 ;;
+   417 ;; Critical Paths under _main in COMMON
+   418 ;;
+   419 ;;   _main->_ADC_convert
+   420 ;;   _main->_PID_controller
+   421 ;;   _move_180->_ADC_convert
+   422 ;;   _PID_controller->___awdiv
+   423 ;;   _ADC_convert->___awdiv
+   424 ;;   ___awdiv->___wmul
+   425 ;;
+   426 ;; Critical Paths under _main in BANK0
+   427 ;;
+   428 ;;   _main->_black_black_check
+   429 ;;   _black_black_check->_move_180
+   430 ;;   _PID_controller->___awdiv
+   431 ;;   _ADC_convert->___awdiv
+   432 ;;
+   433 ;; Critical Paths under _main in BANK1
+   434 ;;
+   435 ;;   None.
+   436 ;;
+   437 ;; Critical Paths under _main in BANK2
+   438 ;;
+   439 ;;   None.
+   440                           
+   441 ;;
+   442 ;;Main: autosize = 0, tempsize = 3, incstack = 0, save=0
+   443 ;;
+   444                           
+   445 ;;
+   446 ;;Call Graph Tables:
+   447 ;;
+   448 ;; ---------------------------------------------------------------------------------
+   449 ;; (Depth) Function   	        Calls       Base Space   Used Autos Params    Refs
+   450 ;; ---------------------------------------------------------------------------------
+   451 ;; (0) _main                                                 3     3      0    1176
+   452 ;;                                             10 BANK0      3     3      0
+   453 ;;                      _init_hardware
+   454 ;;                        _ADC_convert
+   455 ;;                     _PID_controller
+   456 ;;                    _PWM_PID_convert
+   457 ;;                  _black_black_check
+   458 ;;                          _PWM_reset
+   459 ;;                          _PWM_check
+   460 ;;                          _move_stop
+   461 ;; ---------------------------------------------------------------------------------
+   462 ;; (1) _black_black_check                                    3     3      0     392
+   463 ;;                                              7 BANK0      3     3      0
+   464 ;;              _move_forwards_aLittle
+   465 ;;                          _servo_off
+   466 ;;                          _move_stop
+   467 ;;                           _servo_on
+   468 ;;                           _move_180
+   469 ;; ---------------------------------------------------------------------------------
+   470 ;; (2) _move_180                                             3     3      0     392
+   471 ;;                                              4 BANK0      3     3      0
+   472 ;;                        _ADC_convert
+   473 ;; ---------------------------------------------------------------------------------
+   474 ;; (2) _move_forwards_aLittle                                3     3      0       0
+   475 ;;                                              0 COMMON     3     3      0
+   476 ;; ---------------------------------------------------------------------------------
+   477 ;; (1) _PID_controller                                       2     2      0     392
+   478 ;;                                             11 COMMON     2     2      0
+   479 ;;                             ___wmul
+   480 ;;                            ___awdiv
+   481 ;; ---------------------------------------------------------------------------------
+   482 ;; (3) _ADC_convert                                          2     2      0     392
+   483 ;;                                             11 COMMON     2     2      0
+   484 ;;                             ___wmul
+   485 ;;                            ___awdiv
+   486 ;; ---------------------------------------------------------------------------------
+   487 ;; (4) ___awdiv                                              9     5      4     300
+   488 ;;                                              6 COMMON     5     1      4
+   489 ;;                                              0 BANK0      4     4      0
+   490 ;;                             ___wmul (ARG)
+   491 ;; ---------------------------------------------------------------------------------
+   492 ;; (4) ___wmul                                               6     2      4      92
+   493 ;;                                              0 COMMON     6     2      4
+   494 ;; ---------------------------------------------------------------------------------
+   495 ;; (2) _servo_on                                             0     0      0       0
+   496 ;; ---------------------------------------------------------------------------------
+   497 ;; (2) _servo_off                                            0     0      0       0
+   498 ;; ---------------------------------------------------------------------------------
+   499 ;; (1) _move_stop                                            0     0      0       0
+   500 ;; ---------------------------------------------------------------------------------
+   501 ;; (1) _PWM_check                                            1     1      0       0
+   502 ;;                                              0 COMMON     1     1      0
+   503 ;; ---------------------------------------------------------------------------------
+   504 ;; (1) _PWM_reset                                            0     0      0       0
+   505 ;; ---------------------------------------------------------------------------------
+   506 ;; (1) _PWM_PID_convert                                      2     2      0       0
+   507 ;;                                              0 COMMON     2     2      0
+   508 ;; ---------------------------------------------------------------------------------
+   509 ;; (1) _init_hardware                                        0     0      0       0
+   510 ;; ---------------------------------------------------------------------------------
+   511 ;; Estimated maximum stack depth 4
+   512 ;; ---------------------------------------------------------------------------------
+   513                           
+   514 ;; Call Graph Graphs:
+   515                           
+   516 ;; _main (ROOT)
+   517 ;;   _init_hardware
+   518 ;;   _ADC_convert
+   519 ;;     ___wmul
+   520 ;;     ___awdiv
+   521 ;;       ___wmul (ARG)
+   522 ;;   _PID_controller
+   523 ;;     ___wmul
+   524 ;;     ___awdiv
+   525 ;;       ___wmul (ARG)
+   526 ;;   _PWM_PID_convert
+   527 ;;   _black_black_check
+   528 ;;     _move_forwards_aLittle
+   529 ;;     _servo_off
+   530 ;;     _move_stop
+   531 ;;     _servo_on
+   532 ;;     _move_180
+   533 ;;       _ADC_convert
+   534 ;;         ___wmul
+   535 ;;         ___awdiv
+   536 ;;           ___wmul (ARG)
+   537 ;;   _PWM_reset
+   538 ;;   _PWM_check
+   539 ;;   _move_stop
+   540 ;;
+   541                           
+   542 ;; Address spaces:
+   543                           
+   544 ;;Name               Size   Autos  Total    Cost      Usage
+   545 ;;SFR3                 0      0       0       4        0.0%
+   546 ;;BITSFR3              0      0       0       4        0.0%
+   547 ;;BANK2               50      0       0       7        0.0%
+   548 ;;BITBANK2            50      0       0       6        0.0%
+   549 ;;SFR2                 0      0       0       5        0.0%
+   550 ;;BITSFR2              0      0       0       5        0.0%
+   551 ;;SFR1                 0      0       0       2        0.0%
+   552 ;;BITSFR1              0      0       0       2        0.0%
+   553 ;;BANK1               50      0       0       5        0.0%
+   554 ;;BITBANK1            50      0       0       4        0.0%
+   555 ;;CODE                 0      0       0       0        0.0%
+   556 ;;DATA                 0      0      44      10        0.0%
+   557 ;;ABS                  0      0      40       8        0.0%
+   558 ;;NULL                 0      0       0       0        0.0%
+   559 ;;STACK                0      0       4       2        0.0%
+   560 ;;BANK0               50      D      33       3       63.8%
+   561 ;;BITBANK0            50      0       0       9        0.0%
+   562 ;;SFR0                 0      0       0       1        0.0%
+   563 ;;BITSFR0              0      0       0       1        0.0%
+   564 ;;COMMON               E      D       D       1       92.9%
+   565 ;;BITCOMMON            E      0       0       0        0.0%
+   566 ;;EEDATA             100      0       0       0        0.0%
+   567                           
+   568                           	global	_main
+   569                           psect	maintext,global,class=CODE,delta=2
+   570                           global __pmaintext
+   571  0544                     __pmaintext:
+   572                           
+   573 ;; *************** function _main *****************
+   574 ;; Defined at:
+   575 ;;		line 122 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+   576 ;; Parameters:    Size  Location     Type
+   577 ;;		None
+   578 ;; Auto vars:     Size  Location     Type
+   579 ;;		None
+   580 ;; Return value:  Size  Location     Type
+   581 ;;		None               void
+   582 ;; Registers used:
+   583 ;;		wreg, status,2, status,0, btemp+1, pclath, cstack
+   584 ;; Tracked objects:
+   585 ;;		On entry : 17F/0
+   586 ;;		On exit  : 0/0
+   587 ;;		Unchanged: 0/0
+   588 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+   589 ;;      Params:         0       0       0       0
+   590 ;;      Locals:         0       0       0       0
+   591 ;;      Temps:          0       3       0       0
+   592 ;;      Totals:         0       3       0       0
+   593 ;;Total ram usage:        3 bytes
+   594 ;; Hardware stack levels required when called:    4
+   595 ;; This function calls:
+   596 ;;		_init_hardware
+   597 ;;		_ADC_convert
+   598 ;;		_PID_controller
+   599 ;;		_PWM_PID_convert
+   600 ;;		_black_black_check
+   601 ;;		_PWM_reset
+   602 ;;		_PWM_check
+   603 ;;		_move_stop
+   604 ;; This function is called by:
+   605 ;;		Startup code after reset
+   606 ;; This function uses a non-reentrant model
+   607 ;;
+   608                           psect	maintext
+   609                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+   610                           	line	122
+   611                           	global	__size_of_main
+   612  005C                     	__size_of_main	equ	__end_of_main-_main
+   613                           	
+   614  0544                     _main:	
+   615                           	opt	stack 4
+   616                           ; Regs used in _main: [wreg+status,2+status,0+btemp+1+pclath+cstack]
+   617                           	line	123
+   618                           	
+   619  0544                     l3681:	
+   620                           ;robot test 2 - Ch2 yes servo.c: 123: init_hardware();
+   621  0544  118A  23D9  118A   	fcall	_init_hardware
+   622                           	line	125
+   623                           	
+   624  0547                     l3683:	
+   625                           ;robot test 2 - Ch2 yes servo.c: 125: RB6 = 1;
+   626  0547  1283               	bcf	status, 5	;RP0=0, select bank0
+   627  0548  1303               	bcf	status, 6	;RP1=0, select bank0
+   628  0549  1706               	bsf	(54/8),(54)&7
+   629                           	line	126
+   630                           ;robot test 2 - Ch2 yes servo.c: 126: while(RC7 == 0){}
+   631  054A  2D4B               	goto	l951
+   632                           	
+   633  054B                     l952:	
+   634                           	
+   635  054B                     l951:	
+   636  054B  1F87               	btfss	(63/8),(63)&7
+   637  054C  2D4E               	goto	u2851
+   638  054D  2D4F               	goto	u2850
+   639  054E                     u2851:
+   640  054E  2D4B               	goto	l951
+   641  054F                     u2850:
+   642                           	
+   643  054F                     l953:	
+   644                           	line	127
+   645                           ;robot test 2 - Ch2 yes servo.c: 127: RB6 = 0;
+   646  054F  1306               	bcf	(54/8),(54)&7
+   647                           	line	128
+   648                           	
+   649  0550                     l3685:	
+   650                           ;robot test 2 - Ch2 yes servo.c: 128: loopExit = 1;
+   651  0550  3001               	movlw	low(01h)
+   652  0551  00B0               	movwf	(_loopExit)
+   653  0552  3000               	movlw	high(01h)
+   654  0553  00B1               	movwf	((_loopExit))+1
+   655                           	line	130
+   656                           ;robot test 2 - Ch2 yes servo.c: 130: while(loopExit == 1)
+   657  0554  2D7E               	goto	l3697
+   658                           	
+   659  0555                     l955:	
+   660                           	line	132
+   661                           	
+   662  0555                     l3687:	
+   663                           ;robot test 2 - Ch2 yes servo.c: 131: {
+   664                           ;robot test 2 - Ch2 yes servo.c: 132: if(PWMCounter < 99)
+   665  0555  0825               	movf	(_PWMCounter+1),w
+   666  0556  3A80               	xorlw	80h
+   667  0557  00FF               	movwf	btemp+1
+   668  0558  3080               	movlw	(high(063h))^80h
+   669  0559  027F               	subwf	btemp+1,w
+   670  055A  1D03               	skipz
+   671  055B  2D5E               	goto	u2865
+   672  055C  3063               	movlw	low(063h)
+   673  055D  0224               	subwf	(_PWMCounter),w
+   674  055E                     u2865:
+   675                           
+   676  055E  1803               	skipnc
+   677  055F  2D61               	goto	u2861
+   678  0560  2D62               	goto	u2860
+   679  0561                     u2861:
+   680  0561  2D6B               	goto	l3691
+   681  0562                     u2860:
+   682                           	line	134
+   683                           	
+   684  0562                     l3689:	
+   685                           ;robot test 2 - Ch2 yes servo.c: 133: {
+   686                           ;robot test 2 - Ch2 yes servo.c: 134: PWMCounter++;
+   687  0562  3001               	movlw	low(01h)
+   688  0563  1283               	bcf	status, 5	;RP0=0, select bank0
+   689  0564  1303               	bcf	status, 6	;RP1=0, select bank0
+   690  0565  07A4               	addwf	(_PWMCounter),f
+   691  0566  1803               	skipnc
+   692  0567  0AA5               	incf	(_PWMCounter+1),f
+   693  0568  3000               	movlw	high(01h)
+   694  0569  07A5               	addwf	(_PWMCounter+1),f
+   695                           	line	135
+   696                           ;robot test 2 - Ch2 yes servo.c: 135: }
+   697  056A  2D7A               	goto	l957
+   698                           	line	136
+   699                           	
+   700  056B                     l956:	
+   701                           	line	138
+   702                           	
+   703  056B                     l3691:	
+   704                           ;robot test 2 - Ch2 yes servo.c: 136: else
+   705                           ;robot test 2 - Ch2 yes servo.c: 137: {
+   706                           ;robot test 2 - Ch2 yes servo.c: 138: ADC_convert();
+   707  056B  118A  24F2  118A   	fcall	_ADC_convert
+   708                           	line	139
+   709                           ;robot test 2 - Ch2 yes servo.c: 139: PID_controller();
+   710  056E  118A  2616  118A   	fcall	_PID_controller
+   711                           	line	140
+   712                           	
+   713  0571                     l3693:	
+   714                           ;robot test 2 - Ch2 yes servo.c: 140: PWM_PID_convert();
+   715  0571  118A  2698  118A   	fcall	_PWM_PID_convert
+   716                           	line	141
+   717                           	
+   718  0574                     l3695:	
+   719                           ;robot test 2 - Ch2 yes servo.c: 141: black_black_check();
+   720  0574  118A  273D  118A   	fcall	_black_black_check
+   721                           	line	142
+   722                           ;robot test 2 - Ch2 yes servo.c: 142: PWM_reset();
+   723  0577  118A  2475  118A   	fcall	_PWM_reset
+   724                           	line	143
+   725                           	
+   726  057A                     l957:	
+   727                           	line	144
+   728                           ;robot test 2 - Ch2 yes servo.c: 143: }
+   729                           ;robot test 2 - Ch2 yes servo.c: 144: PWM_check();
+   730  057A  118A  244A  118A   	fcall	_PWM_check
+   731  057D  2D7E               	goto	l3697
+   732                           	line	145
+   733                           	
+   734  057E                     l954:	
+   735                           	line	130
+   736                           	
+   737  057E                     l3697:	
+   738  057E  3001               	movlw	01h
+   739  057F  1283               	bcf	status, 5	;RP0=0, select bank0
+   740  0580  1303               	bcf	status, 6	;RP1=0, select bank0
+   741  0581  0630               	xorwf	(_loopExit),w
+   742  0582  0431               	iorwf	(_loopExit+1),w
+   743  0583  1903               	skipnz
+   744  0584  2D86               	goto	u2871
+   745  0585  2D87               	goto	u2870
+   746  0586                     u2871:
+   747  0586  2D55               	goto	l3687
+   748  0587                     u2870:
+   749  0587  2D88               	goto	l3699
+   750                           	
+   751  0588                     l958:	
+   752                           	line	147
+   753                           	
+   754  0588                     l3699:	
+   755                           ;robot test 2 - Ch2 yes servo.c: 145: }
+   756                           ;robot test 2 - Ch2 yes servo.c: 147: move_stop();
+   757  0588  118A  23AF  118A   	fcall	_move_stop
+   758                           	line	148
+   759                           	
+   760  058B                     l3701:	
+   761                           ;robot test 2 - Ch2 yes servo.c: 148: integralError = 0;
+   762  058B  1283               	bcf	status, 5	;RP0=0, select bank0
+   763  058C  1303               	bcf	status, 6	;RP1=0, select bank0
+   764  058D  01AE               	clrf	(_integralError)
+   765  058E  01AF               	clrf	(_integralError+1)
+   766                           	line	149
+   767                           	
+   768  058F                     l3703:	
+   769                           ;robot test 2 - Ch2 yes servo.c: 149: pastError = 0;
+   770  058F  01B2               	clrf	(_pastError)
+   771  0590  01B3               	clrf	(_pastError+1)
+   772                           	line	150
+   773                           	
+   774  0591                     l3705:	
+   775                           ;robot test 2 - Ch2 yes servo.c: 150: _delay(999999);
+   776                           	opt asmopt_off
+   777  0591  3006               movlw  6
+   778  0592  00CA               movwf	((??_main+0)+0+2),f
+   779  0593  3013               movlw	19
+   780  0594  00C9               movwf	((??_main+0)+0+1),f
+   781  0595  30B1               	movlw	177
+   782  0596  00C8               movwf	((??_main+0)+0),f
+   783  0597                     u2887:
+   784  0597  0BC8               	decfsz	((??_main+0)+0),f
+   785  0598  2D97               	goto	u2887
+   786  0599  0BC9               	decfsz	((??_main+0)+0+1),f
+   787  059A  2D97               	goto	u2887
+   788  059B  0BCA               	decfsz	((??_main+0)+0+2),f
+   789  059C  2D97               	goto	u2887
+   790  059D  0064               	clrwdt
+   791                           opt asmopt_on
+   792                           
+   793                           	line	152
+   794                           	
+   795  059E                     l959:	
+   796                           	global	start
+   797  059E  118A  2800         	ljmp	start
+   798                           	opt stack 0
+   799                           GLOBAL	__end_of_main
+   800  05A0                     	__end_of_main:
+   801 ;; =============== function _main ends ============
+   802                           
+   803                           	signat	_main,88
+   804                           	global	_black_black_check
+   805                           psect	text388,local,class=CODE,delta=2
+   806                           global __ptext388
+   807  073D                     __ptext388:
+   808                           
+   809 ;; *************** function _black_black_check *****************
+   810 ;; Defined at:
+   811 ;;		line 176 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+   812 ;; Parameters:    Size  Location     Type
+   813 ;;		None
+   814 ;; Auto vars:     Size  Location     Type
+   815 ;;		None
+   816 ;; Return value:  Size  Location     Type
+   817 ;;		None               void
+   818 ;; Registers used:
+   819 ;;		wreg, status,2, status,0, btemp+1, pclath, cstack
+   820 ;; Tracked objects:
+   821 ;;		On entry : 0/0
+   822 ;;		On exit  : 0/0
+   823 ;;		Unchanged: 0/0
+   824 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+   825 ;;      Params:         0       0       0       0
+   826 ;;      Locals:         0       0       0       0
+   827 ;;      Temps:          0       3       0       0
+   828 ;;      Totals:         0       3       0       0
+   829 ;;Total ram usage:        3 bytes
+   830 ;; Hardware stack levels used:    1
+   831 ;; Hardware stack levels required when called:    3
+   832 ;; This function calls:
+   833 ;;		_move_forwards_aLittle
+   834 ;;		_servo_off
+   835 ;;		_move_stop
+   836 ;;		_servo_on
+   837 ;;		_move_180
+   838 ;; This function is called by:
+   839 ;;		_main
+   840 ;; This function uses a non-reentrant model
+   841 ;;
+   842                           psect	text388
+   843                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+   844                           	line	176
+   845                           	global	__size_of_black_black_check
+   846  00C3                     	__size_of_black_black_check	equ	__end_of_black_black_check-_black_black_check
+   847                           	
+   848  073D                     _black_black_check:	
+   849                           	opt	stack 4
+   850                           ; Regs used in _black_black_check: [wreg+status,2+status,0+btemp+1+pclath+cstack]
+   851                           	line	177
+   852                           	
+   853  073D                     l3629:	
+   854                           ;robot test 2 - Ch2 yes servo.c: 177: if(readSensL >= 0b11000111 && readSensR >= 0b11000
+                                 111)
+   855  073D  1283               	bcf	status, 5	;RP0=0, select bank0
+   856  073E  1303               	bcf	status, 6	;RP1=0, select bank0
+   857  073F  0835               	movf	(_readSensL+1),w
+   858  0740  3A80               	xorlw	80h
+   859  0741  00FF               	movwf	btemp+1
+   860  0742  3080               	movlw	(high(0C7h))^80h
+   861  0743  027F               	subwf	btemp+1,w
+   862  0744  1D03               	skipz
+   863  0745  2F48               	goto	u2755
+   864  0746  30C7               	movlw	low(0C7h)
+   865  0747  0234               	subwf	(_readSensL),w
+   866  0748                     u2755:
+   867                           
+   868  0748  1C03               	skipc
+   869  0749  2F4B               	goto	u2751
+   870  074A  2F4C               	goto	u2750
+   871  074B                     u2751:
+   872  074B  2FFA               	goto	l3679
+   873  074C                     u2750:
+   874                           	
+   875  074C                     l3631:	
+   876  074C  1283               	bcf	status, 5	;RP0=0, select bank0
+   877  074D  1303               	bcf	status, 6	;RP1=0, select bank0
+   878  074E  0837               	movf	(_readSensR+1),w
+   879  074F  3A80               	xorlw	80h
+   880  0750  00FF               	movwf	btemp+1
+   881  0751  3080               	movlw	(high(0C7h))^80h
+   882  0752  027F               	subwf	btemp+1,w
+   883  0753  1D03               	skipz
+   884  0754  2F57               	goto	u2765
+   885  0755  30C7               	movlw	low(0C7h)
+   886  0756  0236               	subwf	(_readSensR),w
+   887  0757                     u2765:
+   888                           
+   889  0757  1C03               	skipc
+   890  0758  2F5A               	goto	u2761
+   891  0759  2F5B               	goto	u2760
+   892  075A                     u2761:
+   893  075A  2FFA               	goto	l3679
+   894  075B                     u2760:
+   895                           	line	179
+   896                           	
+   897  075B                     l3633:	
+   898                           ;robot test 2 - Ch2 yes servo.c: 178: {
+   899                           ;robot test 2 - Ch2 yes servo.c: 179: changeCounter++;
+   900  075B  3001               	movlw	low(01h)
+   901  075C  1283               	bcf	status, 5	;RP0=0, select bank0
+   902  075D  1303               	bcf	status, 6	;RP1=0, select bank0
+   903  075E  07AA               	addwf	(_changeCounter),f
+   904  075F  1803               	skipnc
+   905  0760  0AAB               	incf	(_changeCounter+1),f
+   906  0761  3000               	movlw	high(01h)
+   907  0762  07AB               	addwf	(_changeCounter+1),f
+   908                           	line	180
+   909                           	
+   910  0763                     l3635:	
+   911                           ;robot test 2 - Ch2 yes servo.c: 180: if(changeCounter > 10)
+   912  0763  082B               	movf	(_changeCounter+1),w
+   913  0764  3A80               	xorlw	80h
+   914  0765  00FF               	movwf	btemp+1
+   915  0766  3080               	movlw	(high(0Bh))^80h
+   916  0767  027F               	subwf	btemp+1,w
+   917  0768  1D03               	skipz
+   918  0769  2F6C               	goto	u2775
+   919  076A  300B               	movlw	low(0Bh)
+   920  076B  022A               	subwf	(_changeCounter),w
+   921  076C                     u2775:
+   922                           
+   923  076C  1C03               	skipc
+   924  076D  2F6F               	goto	u2771
+   925  076E  2F70               	goto	u2770
+   926  076F                     u2771:
+   927  076F  2FFF               	goto	l984
+   928  0770                     u2770:
+   929                           	line	182
+   930                           	
+   931  0770                     l3637:	
+   932                           ;robot test 2 - Ch2 yes servo.c: 181: {
+   933                           ;robot test 2 - Ch2 yes servo.c: 182: changeCounter = 0;
+   934  0770  1283               	bcf	status, 5	;RP0=0, select bank0
+   935  0771  1303               	bcf	status, 6	;RP1=0, select bank0
+   936  0772  01AA               	clrf	(_changeCounter)
+   937  0773  01AB               	clrf	(_changeCounter+1)
+   938                           	line	183
+   939                           	
+   940  0774                     l3639:	
+   941                           ;robot test 2 - Ch2 yes servo.c: 183: blackBlackCounter++;
+   942  0774  3001               	movlw	low(01h)
+   943  0775  07A8               	addwf	(_blackBlackCounter),f
+   944  0776  1803               	skipnc
+   945  0777  0AA9               	incf	(_blackBlackCounter+1),f
+   946  0778  3000               	movlw	high(01h)
+   947  0779  07A9               	addwf	(_blackBlackCounter+1),f
+   948                           	line	186
+   949                           	
+   950  077A                     l3641:	
+   951                           ;robot test 2 - Ch2 yes servo.c: 186: if(blackBlackCounter == 1)
+   952  077A  3001               	movlw	01h
+   953  077B  0628               	xorwf	(_blackBlackCounter),w
+   954  077C  0429               	iorwf	(_blackBlackCounter+1),w
+   955  077D  1D03               	skipz
+   956  077E  2F80               	goto	u2781
+   957  077F  2F81               	goto	u2780
+   958  0780                     u2781:
+   959  0780  2F88               	goto	l3647
+   960  0781                     u2780:
+   961                           	line	188
+   962                           	
+   963  0781                     l3643:	
+   964                           ;robot test 2 - Ch2 yes servo.c: 187: {
+   965                           ;robot test 2 - Ch2 yes servo.c: 188: move_forwards_aLittle();
+   966  0781  118A  23C6  118A   	fcall	_move_forwards_aLittle
+   967                           	line	189
+   968                           	
+   969  0784                     l3645:	
+   970                           ;robot test 2 - Ch2 yes servo.c: 189: servo_off();
+   971  0784  118A  23A7  118A   	fcall	_servo_off
+   972                           	line	190
+   973                           ;robot test 2 - Ch2 yes servo.c: 190: }
+   974  0787  2FF0               	goto	l3673
+   975                           	line	191
+   976                           	
+   977  0788                     l973:	
+   978                           	
+   979  0788                     l3647:	
+   980                           ;robot test 2 - Ch2 yes servo.c: 191: else if(blackBlackCounter == 2 || blackBlackCounte
+                                 r == 4 || blackBlackCounter == 6)
+   981  0788  3002               	movlw	02h
+   982  0789  1283               	bcf	status, 5	;RP0=0, select bank0
+   983  078A  1303               	bcf	status, 6	;RP1=0, select bank0
+   984  078B  0628               	xorwf	(_blackBlackCounter),w
+   985  078C  0429               	iorwf	(_blackBlackCounter+1),w
+   986  078D  1903               	skipnz
+   987  078E  2F90               	goto	u2791
+   988  078F  2F91               	goto	u2790
+   989  0790                     u2791:
+   990  0790  2FA0               	goto	l3653
+   991  0791                     u2790:
+   992                           	
+   993  0791                     l3649:	
+   994  0791  3004               	movlw	04h
+   995  0792  0628               	xorwf	(_blackBlackCounter),w
+   996  0793  0429               	iorwf	(_blackBlackCounter+1),w
+   997  0794  1903               	skipnz
+   998  0795  2F97               	goto	u2801
+   999  0796  2F98               	goto	u2800
+  1000  0797                     u2801:
+  1001  0797  2FA0               	goto	l3653
+  1002  0798                     u2800:
+  1003                           	
+  1004  0798                     l3651:	
+  1005  0798  3006               	movlw	06h
+  1006  0799  0628               	xorwf	(_blackBlackCounter),w
+  1007  079A  0429               	iorwf	(_blackBlackCounter+1),w
+  1008  079B  1D03               	skipz
+  1009  079C  2F9E               	goto	u2811
+  1010  079D  2F9F               	goto	u2810
+  1011  079E                     u2811:
+  1012  079E  2FB9               	goto	l3659
+  1013  079F                     u2810:
+  1014  079F  2FA0               	goto	l3653
+  1015                           	
+  1016  07A0                     l977:	
+  1017                           	line	193
+  1018                           	
+  1019  07A0                     l3653:	
+  1020                           ;robot test 2 - Ch2 yes servo.c: 192: {
+  1021                           ;robot test 2 - Ch2 yes servo.c: 193: move_stop();
+  1022  07A0  118A  23AF  118A   	fcall	_move_stop
+  1023                           	line	194
+  1024                           ;robot test 2 - Ch2 yes servo.c: 194: servo_on();
+  1025  07A3  118A  23AB  118A   	fcall	_servo_on
+  1026                           	line	195
+  1027                           	
+  1028  07A6                     l3655:	
+  1029                           ;robot test 2 - Ch2 yes servo.c: 195: _delay(1000000);
+  1030                           	opt asmopt_off
+  1031  07A6  3006               movlw  6
+  1032  07A7  1283               	bcf	status, 5	;RP0=0, select bank0
+  1033  07A8  1303               	bcf	status, 6	;RP1=0, select bank0
+  1034  07A9  00C7               movwf	((??_black_black_check+0)+0+2),f
+  1035  07AA  3013               movlw	19
+  1036  07AB  00C6               movwf	((??_black_black_check+0)+0+1),f
+  1037  07AC  30B1               	movlw	177
+  1038  07AD  00C5               movwf	((??_black_black_check+0)+0),f
+  1039  07AE                     u2897:
+  1040  07AE  0BC5               	decfsz	((??_black_black_check+0)+0),f
+  1041  07AF  2FAE               	goto	u2897
+  1042  07B0  0BC6               	decfsz	((??_black_black_check+0)+0+1),f
+  1043  07B1  2FAE               	goto	u2897
+  1044  07B2  0BC7               	decfsz	((??_black_black_check+0)+0+2),f
+  1045  07B3  2FAE               	goto	u2897
+  1046  07B4  2FB5               	nop2
+  1047                           opt asmopt_on
+  1048                           
+  1049                           	line	196
+  1050                           	
+  1051  07B5                     l3657:	
+  1052                           ;robot test 2 - Ch2 yes servo.c: 196: move_180();
+  1053  07B5  118A  24AC  118A   	fcall	_move_180
+  1054                           	line	197
+  1055                           ;robot test 2 - Ch2 yes servo.c: 197: }
+  1056  07B8  2FF0               	goto	l3673
+  1057                           	line	198
+  1058                           	
+  1059  07B9                     l975:	
+  1060                           	
+  1061  07B9                     l3659:	
+  1062                           ;robot test 2 - Ch2 yes servo.c: 198: else if(blackBlackCounter == 3 || blackBlackCounte
+                                 r == 5 || blackBlackCounter == 7)
+  1063  07B9  3003               	movlw	03h
+  1064  07BA  1283               	bcf	status, 5	;RP0=0, select bank0
+  1065  07BB  1303               	bcf	status, 6	;RP1=0, select bank0
+  1066  07BC  0628               	xorwf	(_blackBlackCounter),w
+  1067  07BD  0429               	iorwf	(_blackBlackCounter+1),w
+  1068  07BE  1903               	skipnz
+  1069  07BF  2FC1               	goto	u2821
+  1070  07C0  2FC2               	goto	u2820
+  1071  07C1                     u2821:
+  1072  07C1  2FD1               	goto	l3665
+  1073  07C2                     u2820:
+  1074                           	
+  1075  07C2                     l3661:	
+  1076  07C2  3005               	movlw	05h
+  1077  07C3  0628               	xorwf	(_blackBlackCounter),w
+  1078  07C4  0429               	iorwf	(_blackBlackCounter+1),w
+  1079  07C5  1903               	skipnz
+  1080  07C6  2FC8               	goto	u2831
+  1081  07C7  2FC9               	goto	u2830
+  1082  07C8                     u2831:
+  1083  07C8  2FD1               	goto	l3665
+  1084  07C9                     u2830:
+  1085                           	
+  1086  07C9                     l3663:	
+  1087  07C9  3007               	movlw	07h
+  1088  07CA  0628               	xorwf	(_blackBlackCounter),w
+  1089  07CB  0429               	iorwf	(_blackBlackCounter+1),w
+  1090  07CC  1D03               	skipz
+  1091  07CD  2FCF               	goto	u2841
+  1092  07CE  2FD0               	goto	u2840
+  1093  07CF                     u2841:
+  1094  07CF  2FEA               	goto	l3671
+  1095  07D0                     u2840:
+  1096  07D0  2FD1               	goto	l3665
+  1097                           	
+  1098  07D1                     l981:	
+  1099                           	line	200
+  1100                           	
+  1101  07D1                     l3665:	
+  1102                           ;robot test 2 - Ch2 yes servo.c: 199: {
+  1103                           ;robot test 2 - Ch2 yes servo.c: 200: move_stop();
+  1104  07D1  118A  23AF  118A   	fcall	_move_stop
+  1105                           	line	201
+  1106                           ;robot test 2 - Ch2 yes servo.c: 201: servo_off();
+  1107  07D4  118A  23A7  118A   	fcall	_servo_off
+  1108                           	line	202
+  1109                           	
+  1110  07D7                     l3667:	
+  1111                           ;robot test 2 - Ch2 yes servo.c: 202: _delay(1000000);
+  1112                           	opt asmopt_off
+  1113  07D7  3006               movlw  6
+  1114  07D8  1283               	bcf	status, 5	;RP0=0, select bank0
+  1115  07D9  1303               	bcf	status, 6	;RP1=0, select bank0
+  1116  07DA  00C7               movwf	((??_black_black_check+0)+0+2),f
+  1117  07DB  3013               movlw	19
+  1118  07DC  00C6               movwf	((??_black_black_check+0)+0+1),f
+  1119  07DD  30B1               	movlw	177
+  1120  07DE  00C5               movwf	((??_black_black_check+0)+0),f
+  1121  07DF                     u2907:
+  1122  07DF  0BC5               	decfsz	((??_black_black_check+0)+0),f
+  1123  07E0  2FDF               	goto	u2907
+  1124  07E1  0BC6               	decfsz	((??_black_black_check+0)+0+1),f
+  1125  07E2  2FDF               	goto	u2907
+  1126  07E3  0BC7               	decfsz	((??_black_black_check+0)+0+2),f
+  1127  07E4  2FDF               	goto	u2907
+  1128  07E5  2FE6               	nop2
+  1129                           opt asmopt_on
+  1130                           
+  1131                           	line	203
+  1132                           	
+  1133  07E6                     l3669:	
+  1134                           ;robot test 2 - Ch2 yes servo.c: 203: move_180();
+  1135  07E6  118A  24AC  118A   	fcall	_move_180
+  1136                           	line	204
+  1137                           ;robot test 2 - Ch2 yes servo.c: 204: }
+  1138  07E9  2FF0               	goto	l3673
+  1139                           	line	205
+  1140                           	
+  1141  07EA                     l979:	
+  1142                           	line	206
+  1143                           	
+  1144  07EA                     l3671:	
+  1145                           ;robot test 2 - Ch2 yes servo.c: 205: else
+  1146                           ;robot test 2 - Ch2 yes servo.c: 206: move_180();
+  1147  07EA  118A  24AC  118A   	fcall	_move_180
+  1148  07ED  2FF0               	goto	l3673
+  1149                           	
+  1150  07EE                     l982:	
+  1151  07EE  2FF0               	goto	l3673
+  1152                           	
+  1153  07EF                     l978:	
+  1154  07EF  2FF0               	goto	l3673
+  1155                           	
+  1156  07F0                     l974:	
+  1157                           	line	208
+  1158                           	
+  1159  07F0                     l3673:	
+  1160                           ;robot test 2 - Ch2 yes servo.c: 208: integralError = 0;
+  1161  07F0  1283               	bcf	status, 5	;RP0=0, select bank0
+  1162  07F1  1303               	bcf	status, 6	;RP1=0, select bank0
+  1163  07F2  01AE               	clrf	(_integralError)
+  1164  07F3  01AF               	clrf	(_integralError+1)
+  1165                           	line	209
+  1166                           	
+  1167  07F4                     l3675:	
+  1168                           ;robot test 2 - Ch2 yes servo.c: 209: pastError = 0;
+  1169  07F4  01B2               	clrf	(_pastError)
+  1170  07F5  01B3               	clrf	(_pastError+1)
+  1171                           	line	210
+  1172                           	
+  1173  07F6                     l3677:	
+  1174                           ;robot test 2 - Ch2 yes servo.c: 210: derivativeError = 0;
+  1175  07F6  01B8               	clrf	(_derivativeError)
+  1176  07F7  01B9               	clrf	(_derivativeError+1)
+  1177  07F8  2FFF               	goto	l984
+  1178                           	line	211
+  1179                           	
+  1180  07F9                     l972:	
+  1181                           	line	212
+  1182                           ;robot test 2 - Ch2 yes servo.c: 211: }
+  1183                           ;robot test 2 - Ch2 yes servo.c: 212: }
+  1184  07F9  2FFF               	goto	l984
+  1185                           	line	213
+  1186                           	
+  1187  07FA                     l971:	
+  1188                           	line	214
+  1189                           	
+  1190  07FA                     l3679:	
+  1191                           ;robot test 2 - Ch2 yes servo.c: 213: else
+  1192                           ;robot test 2 - Ch2 yes servo.c: 214: changeCounter = 0;
+  1193  07FA  1283               	bcf	status, 5	;RP0=0, select bank0
+  1194  07FB  1303               	bcf	status, 6	;RP1=0, select bank0
+  1195  07FC  01AA               	clrf	(_changeCounter)
+  1196  07FD  01AB               	clrf	(_changeCounter+1)
+  1197  07FE  2FFF               	goto	l984
+  1198                           	
+  1199  07FF                     l983:	
+  1200                           	line	215
+  1201                           	
+  1202  07FF                     l984:	
+  1203  07FF  0008               	return
+  1204                           	opt stack 0
+  1205                           GLOBAL	__end_of_black_black_check
+  1206  0800                     	__end_of_black_black_check:
+  1207 ;; =============== function _black_black_check ends ============
+  1208                           
+  1209                           	signat	_black_black_check,88
+  1210                           	global	_move_180
+  1211                           psect	text389,local,class=CODE,delta=2
+  1212                           global __ptext389
+  1213  04AC                     __ptext389:
+  1214                           
+  1215 ;; *************** function _move_180 *****************
+  1216 ;; Defined at:
+  1217 ;;		line 352 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  1218 ;; Parameters:    Size  Location     Type
+  1219 ;;		None
+  1220 ;; Auto vars:     Size  Location     Type
+  1221 ;;		None
+  1222 ;; Return value:  Size  Location     Type
+  1223 ;;		None               void
+  1224 ;; Registers used:
+  1225 ;;		wreg, status,2, status,0, btemp+1, pclath, cstack
+  1226 ;; Tracked objects:
+  1227 ;;		On entry : 0/0
+  1228 ;;		On exit  : 0/0
+  1229 ;;		Unchanged: 0/0
+  1230 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  1231 ;;      Params:         0       0       0       0
+  1232 ;;      Locals:         0       0       0       0
+  1233 ;;      Temps:          0       3       0       0
+  1234 ;;      Totals:         0       3       0       0
+  1235 ;;Total ram usage:        3 bytes
+  1236 ;; Hardware stack levels used:    1
+  1237 ;; Hardware stack levels required when called:    2
+  1238 ;; This function calls:
+  1239 ;;		_ADC_convert
+  1240 ;; This function is called by:
+  1241 ;;		_black_black_check
+  1242 ;; This function uses a non-reentrant model
+  1243 ;;
+  1244                           psect	text389
+  1245                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  1246                           	line	352
+  1247                           	global	__size_of_move_180
+  1248  0046                     	__size_of_move_180	equ	__end_of_move_180-_move_180
+  1249                           	
+  1250  04AC                     _move_180:	
+  1251                           	opt	stack 4
+  1252                           ; Regs used in _move_180: [wreg+status,2+status,0+btemp+1+pclath+cstack]
+  1253                           	line	353
+  1254                           	
+  1255  04AC                     l3609:	
+  1256                           ;robot test 2 - Ch2 yes servo.c: 353: RC6 = 0;
+  1257  04AC  1283               	bcf	status, 5	;RP0=0, select bank0
+  1258  04AD  1303               	bcf	status, 6	;RP1=0, select bank0
+  1259  04AE  1307               	bcf	(62/8),(62)&7
+  1260                           	line	354
+  1261                           ;robot test 2 - Ch2 yes servo.c: 354: RC3 = 1;
+  1262  04AF  1587               	bsf	(59/8),(59)&7
+  1263                           	line	355
+  1264                           ;robot test 2 - Ch2 yes servo.c: 355: RC5 = 0;
+  1265  04B0  1287               	bcf	(61/8),(61)&7
+  1266                           	line	356
+  1267                           ;robot test 2 - Ch2 yes servo.c: 356: RC4 = 1;
+  1268  04B1  1607               	bsf	(60/8),(60)&7
+  1269                           	line	357
+  1270                           	
+  1271  04B2                     l3611:	
+  1272                           ;robot test 2 - Ch2 yes servo.c: 357: _delay(1000000*3/4);
+  1273                           	opt asmopt_off
+  1274  04B2  3004               movlw  4
+  1275  04B3  00C4               movwf	((??_move_180+0)+0+2),f
+  1276  04B4  30CF               movlw	207
+  1277  04B5  00C3               movwf	((??_move_180+0)+0+1),f
+  1278  04B6  3003               	movlw	3
+  1279  04B7  00C2               movwf	((??_move_180+0)+0),f
+  1280  04B8                     u2917:
+  1281  04B8  0BC2               	decfsz	((??_move_180+0)+0),f
+  1282  04B9  2CB8               	goto	u2917
+  1283  04BA  0BC3               	decfsz	((??_move_180+0)+0+1),f
+  1284  04BB  2CB8               	goto	u2917
+  1285  04BC  0BC4               	decfsz	((??_move_180+0)+0+2),f
+  1286  04BD  2CB8               	goto	u2917
+  1287  04BE  2CBF               	nop2
+  1288                           opt asmopt_on
+  1289                           
+  1290                           	line	358
+  1291                           	
+  1292  04BF                     l3613:	
+  1293                           ;robot test 2 - Ch2 yes servo.c: 358: RC6 = 1;
+  1294  04BF  1283               	bcf	status, 5	;RP0=0, select bank0
+  1295  04C0  1303               	bcf	status, 6	;RP1=0, select bank0
+  1296  04C1  1707               	bsf	(62/8),(62)&7
+  1297                           	line	359
+  1298                           	
+  1299  04C2                     l3615:	
+  1300                           ;robot test 2 - Ch2 yes servo.c: 359: RC3 = 0;
+  1301  04C2  1187               	bcf	(59/8),(59)&7
+  1302                           	line	360
+  1303                           	
+  1304  04C3                     l3617:	
+  1305                           ;robot test 2 - Ch2 yes servo.c: 360: RC5 = 0;
+  1306  04C3  1287               	bcf	(61/8),(61)&7
+  1307                           	line	361
+  1308                           	
+  1309  04C4                     l3619:	
+  1310                           ;robot test 2 - Ch2 yes servo.c: 361: RC4 = 1;
+  1311  04C4  1607               	bsf	(60/8),(60)&7
+  1312                           	line	362
+  1313                           ;robot test 2 - Ch2 yes servo.c: 362: _delay(1000000*3/2);
+  1314                           	opt asmopt_off
+  1315  04C5  3008               movlw  8
+  1316  04C6  00C4               movwf	((??_move_180+0)+0+2),f
+  1317  04C7  309D               movlw	157
+  1318  04C8  00C3               movwf	((??_move_180+0)+0+1),f
+  1319  04C9  300B               	movlw	11
+  1320  04CA  00C2               movwf	((??_move_180+0)+0),f
+  1321  04CB                     u2927:
+  1322  04CB  0BC2               	decfsz	((??_move_180+0)+0),f
+  1323  04CC  2CCB               	goto	u2927
+  1324  04CD  0BC3               	decfsz	((??_move_180+0)+0+1),f
+  1325  04CE  2CCB               	goto	u2927
+  1326  04CF  0BC4               	decfsz	((??_move_180+0)+0+2),f
+  1327  04D0  2CCB               	goto	u2927
+  1328  04D1  2CD2               	nop2
+  1329                           opt asmopt_on
+  1330                           
+  1331                           	line	363
+  1332                           	
+  1333  04D2                     l3621:	
+  1334                           ;robot test 2 - Ch2 yes servo.c: 363: ADC_convert();
+  1335  04D2  118A  24F2  118A   	fcall	_ADC_convert
+  1336                           	line	364
+  1337                           ;robot test 2 - Ch2 yes servo.c: 364: while(readSensR < 0b11100000)
+  1338  04D5  2CE1               	goto	l3627
+  1339                           	
+  1340  04D6                     l1025:	
+  1341                           	line	366
+  1342                           	
+  1343  04D6                     l3623:	
+  1344                           ;robot test 2 - Ch2 yes servo.c: 365: {
+  1345                           ;robot test 2 - Ch2 yes servo.c: 366: ADC_convert();
+  1346  04D6  118A  24F2  118A   	fcall	_ADC_convert
+  1347                           	line	367
+  1348                           	
+  1349  04D9                     l3625:	
+  1350                           ;robot test 2 - Ch2 yes servo.c: 367: _delay(50);
+  1351                           	opt asmopt_off
+  1352  04D9  3010               movlw	16
+  1353  04DA  1283               	bcf	status, 5	;RP0=0, select bank0
+  1354  04DB  1303               	bcf	status, 6	;RP1=0, select bank0
+  1355  04DC  00C2               movwf	(??_move_180+0)+0,f
+  1356  04DD                     u2937:
+  1357  04DD  0BC2               decfsz	(??_move_180+0)+0,f
+  1358  04DE  2CDD               	goto	u2937
+  1359  04DF  0064               	clrwdt
+  1360                           opt asmopt_on
+  1361                           
+  1362  04E0  2CE1               	goto	l3627
+  1363                           	line	368
+  1364                           	
+  1365  04E1                     l1024:	
+  1366                           	line	364
+  1367                           	
+  1368  04E1                     l3627:	
+  1369  04E1  1283               	bcf	status, 5	;RP0=0, select bank0
+  1370  04E2  1303               	bcf	status, 6	;RP1=0, select bank0
+  1371  04E3  0837               	movf	(_readSensR+1),w
+  1372  04E4  3A80               	xorlw	80h
+  1373  04E5  00FF               	movwf	btemp+1
+  1374  04E6  3080               	movlw	(high(0E0h))^80h
+  1375  04E7  027F               	subwf	btemp+1,w
+  1376  04E8  1D03               	skipz
+  1377  04E9  2CEC               	goto	u2745
+  1378  04EA  30E0               	movlw	low(0E0h)
+  1379  04EB  0236               	subwf	(_readSensR),w
+  1380  04EC                     u2745:
+  1381                           
+  1382  04EC  1C03               	skipc
+  1383  04ED  2CEF               	goto	u2741
+  1384  04EE  2CF0               	goto	u2740
+  1385  04EF                     u2741:
+  1386  04EF  2CD6               	goto	l3623
+  1387  04F0                     u2740:
+  1388  04F0  2CF1               	goto	l1027
+  1389                           	
+  1390  04F1                     l1026:	
+  1391                           	line	369
+  1392                           	
+  1393  04F1                     l1027:	
+  1394  04F1  0008               	return
+  1395                           	opt stack 0
+  1396                           GLOBAL	__end_of_move_180
+  1397  04F2                     	__end_of_move_180:
+  1398 ;; =============== function _move_180 ends ============
+  1399                           
+  1400                           	signat	_move_180,88
+  1401                           	global	_move_forwards_aLittle
+  1402                           psect	text390,local,class=CODE,delta=2
+  1403                           global __ptext390
+  1404  03C6                     __ptext390:
+  1405                           
+  1406 ;; *************** function _move_forwards_aLittle *****************
+  1407 ;; Defined at:
+  1408 ;;		line 343 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  1409 ;; Parameters:    Size  Location     Type
+  1410 ;;		None
+  1411 ;; Auto vars:     Size  Location     Type
+  1412 ;;		None
+  1413 ;; Return value:  Size  Location     Type
+  1414 ;;		None               void
+  1415 ;; Registers used:
+  1416 ;;		wreg
+  1417 ;; Tracked objects:
+  1418 ;;		On entry : 0/0
+  1419 ;;		On exit  : 0/0
+  1420 ;;		Unchanged: 0/0
+  1421 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  1422 ;;      Params:         0       0       0       0
+  1423 ;;      Locals:         0       0       0       0
+  1424 ;;      Temps:          3       0       0       0
+  1425 ;;      Totals:         3       0       0       0
+  1426 ;;Total ram usage:        3 bytes
+  1427 ;; Hardware stack levels used:    1
+  1428 ;; This function calls:
+  1429 ;;		Nothing
+  1430 ;; This function is called by:
+  1431 ;;		_black_black_check
+  1432 ;; This function uses a non-reentrant model
+  1433 ;;
+  1434                           psect	text390
+  1435                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  1436                           	line	343
+  1437                           	global	__size_of_move_forwards_aLittle
+  1438  0013                     	__size_of_move_forwards_aLittle	equ	__end_of_move_forwards_aLittle-_move_forwards_aLitt
+                                 le
+  1439                           	
+  1440  03C6                     _move_forwards_aLittle:	
+  1441                           	opt	stack 6
+  1442                           ; Regs used in _move_forwards_aLittle: [wreg]
+  1443                           	line	344
+  1444                           	
+  1445  03C6                     l3605:	
+  1446                           ;robot test 2 - Ch2 yes servo.c: 344: RC6 = 1;
+  1447  03C6  1283               	bcf	status, 5	;RP0=0, select bank0
+  1448  03C7  1303               	bcf	status, 6	;RP1=0, select bank0
+  1449  03C8  1707               	bsf	(62/8),(62)&7
+  1450                           	line	345
+  1451                           ;robot test 2 - Ch2 yes servo.c: 345: RC3 = 0;
+  1452  03C9  1187               	bcf	(59/8),(59)&7
+  1453                           	line	346
+  1454                           ;robot test 2 - Ch2 yes servo.c: 346: RC5 = 1;
+  1455  03CA  1687               	bsf	(61/8),(61)&7
+  1456                           	line	347
+  1457                           ;robot test 2 - Ch2 yes servo.c: 347: RC4 = 0;
+  1458  03CB  1207               	bcf	(60/8),(60)&7
+  1459                           	line	348
+  1460                           	
+  1461  03CC                     l3607:	
+  1462                           ;robot test 2 - Ch2 yes servo.c: 348: _delay(800000);
+  1463                           	opt asmopt_off
+  1464  03CC  3005               movlw  5
+  1465  03CD  00F2               movwf	((??_move_forwards_aLittle+0)+0+2),f
+  1466  03CE  300F               movlw	15
+  1467  03CF  00F1               movwf	((??_move_forwards_aLittle+0)+0+1),f
+  1468  03D0  30F4               	movlw	244
+  1469  03D1  00F0               movwf	((??_move_forwards_aLittle+0)+0),f
+  1470  03D2                     u2947:
+  1471  03D2  0BF0               	decfsz	((??_move_forwards_aLittle+0)+0),f
+  1472  03D3  2BD2               	goto	u2947
+  1473  03D4  0BF1               	decfsz	((??_move_forwards_aLittle+0)+0+1),f
+  1474  03D5  2BD2               	goto	u2947
+  1475  03D6  0BF2               	decfsz	((??_move_forwards_aLittle+0)+0+2),f
+  1476  03D7  2BD2               	goto	u2947
+  1477                           opt asmopt_on
+  1478                           
+  1479                           	line	349
+  1480                           	
+  1481  03D8                     l1021:	
+  1482  03D8  0008               	return
+  1483                           	opt stack 0
+  1484                           GLOBAL	__end_of_move_forwards_aLittle
+  1485  03D9                     	__end_of_move_forwards_aLittle:
+  1486 ;; =============== function _move_forwards_aLittle ends ============
+  1487                           
+  1488                           	signat	_move_forwards_aLittle,88
+  1489                           	global	_PID_controller
+  1490                           psect	text391,local,class=CODE,delta=2
+  1491                           global __ptext391
+  1492  0616                     __ptext391:
+  1493                           
+  1494 ;; *************** function _PID_controller *****************
+  1495 ;; Defined at:
+  1496 ;;		line 219 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  1497 ;; Parameters:    Size  Location     Type
+  1498 ;;		None
+  1499 ;; Auto vars:     Size  Location     Type
+  1500 ;;		None
+  1501 ;; Return value:  Size  Location     Type
+  1502 ;;		None               void
+  1503 ;; Registers used:
+  1504 ;;		wreg, status,2, status,0, pclath, cstack
+  1505 ;; Tracked objects:
+  1506 ;;		On entry : 0/0
+  1507 ;;		On exit  : 0/0
+  1508 ;;		Unchanged: 0/0
+  1509 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  1510 ;;      Params:         0       0       0       0
+  1511 ;;      Locals:         0       0       0       0
+  1512 ;;      Temps:          2       0       0       0
+  1513 ;;      Totals:         2       0       0       0
+  1514 ;;Total ram usage:        2 bytes
+  1515 ;; Hardware stack levels used:    1
+  1516 ;; Hardware stack levels required when called:    1
+  1517 ;; This function calls:
+  1518 ;;		___wmul
+  1519 ;;		___awdiv
+  1520 ;; This function is called by:
+  1521 ;;		_main
+  1522 ;; This function uses a non-reentrant model
+  1523 ;;
+  1524                           psect	text391
+  1525                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  1526                           	line	219
+  1527                           	global	__size_of_PID_controller
+  1528  0082                     	__size_of_PID_controller	equ	__end_of_PID_controller-_PID_controller
+  1529                           	
+  1530  0616                     _PID_controller:	
+  1531                           	opt	stack 6
+  1532                           ; Regs used in _PID_controller: [wreg+status,2+status,0+pclath+cstack]
+  1533                           	line	220
+  1534                           	
+  1535  0616                     l3589:	
+  1536                           ;robot test 2 - Ch2 yes servo.c: 220: error = readSensL - readSensR;
+  1537  0616  1283               	bcf	status, 5	;RP0=0, select bank0
+  1538  0617  1303               	bcf	status, 6	;RP1=0, select bank0
+  1539  0618  0936               	comf	(_readSensR),w
+  1540  0619  00FB               	movwf	(??_PID_controller+0)+0
+  1541  061A  0937               	comf	(_readSensR+1),w
+  1542  061B  00FC               	movwf	((??_PID_controller+0)+0+1)
+  1543  061C  0AFB               	incf	(??_PID_controller+0)+0,f
+  1544  061D  1903               	skipnz
+  1545  061E  0AFC               	incf	((??_PID_controller+0)+0+1),f
+  1546  061F  0834               	movf	(_readSensL),w
+  1547  0620  077B               	addwf	0+(??_PID_controller+0)+0,w
+  1548  0621  00BA               	movwf	(_error)
+  1549  0622  0835               	movf	(_readSensL+1),w
+  1550  0623  1803               	skipnc
+  1551  0624  0A35               	incf	(_readSensL+1),w
+  1552  0625  077C               	addwf	1+(??_PID_controller+0)+0,w
+  1553  0626  00BB               	movwf	1+(_error)
+  1554                           	line	222
+  1555                           ;robot test 2 - Ch2 yes servo.c: 222: derivativeError = error - pastError;
+  1556  0627  0932               	comf	(_pastError),w
+  1557  0628  00FB               	movwf	(??_PID_controller+0)+0
+  1558  0629  0933               	comf	(_pastError+1),w
+  1559  062A  00FC               	movwf	((??_PID_controller+0)+0+1)
+  1560  062B  0AFB               	incf	(??_PID_controller+0)+0,f
+  1561  062C  1903               	skipnz
+  1562  062D  0AFC               	incf	((??_PID_controller+0)+0+1),f
+  1563  062E  083A               	movf	(_error),w
+  1564  062F  077B               	addwf	0+(??_PID_controller+0)+0,w
+  1565  0630  00B8               	movwf	(_derivativeError)
+  1566  0631  083B               	movf	(_error+1),w
+  1567  0632  1803               	skipnc
+  1568  0633  0A3B               	incf	(_error+1),w
+  1569  0634  077C               	addwf	1+(??_PID_controller+0)+0,w
+  1570  0635  00B9               	movwf	1+(_derivativeError)
+  1571                           	line	223
+  1572                           	
+  1573  0636                     l3591:	
+  1574                           ;robot test 2 - Ch2 yes servo.c: 223: D_turn = 700 * derivativeError;
+  1575  0636  0839               	movf	(_derivativeError+1),w
+  1576  0637  01F1               	clrf	(?___wmul+1)
+  1577  0638  07F1               	addwf	(?___wmul+1)
+  1578  0639  0838               	movf	(_derivativeError),w
+  1579  063A  01F0               	clrf	(?___wmul)
+  1580  063B  07F0               	addwf	(?___wmul)
+  1581                           
+  1582  063C  30BC               	movlw	low(02BCh)
+  1583  063D  00F2               	movwf	0+(?___wmul)+02h
+  1584  063E  3002               	movlw	high(02BCh)
+  1585  063F  00F3               	movwf	(0+(?___wmul)+02h)+1
+  1586  0640  118A  23F6  118A   	fcall	___wmul
+  1587  0643  0871               	movf	(1+(?___wmul)),w
+  1588  0644  1283               	bcf	status, 5	;RP0=0, select bank0
+  1589  0645  1303               	bcf	status, 6	;RP1=0, select bank0
+  1590  0646  01A1               	clrf	(_D_turn+1)
+  1591  0647  07A1               	addwf	(_D_turn+1)
+  1592  0648  0870               	movf	(0+(?___wmul)),w
+  1593  0649  01A0               	clrf	(_D_turn)
+  1594  064A  07A0               	addwf	(_D_turn)
+  1595                           
+  1596                           	line	224
+  1597                           	
+  1598  064B                     l3593:	
+  1599                           ;robot test 2 - Ch2 yes servo.c: 224: pastError = error;
+  1600  064B  083B               	movf	(_error+1),w
+  1601  064C  01B3               	clrf	(_pastError+1)
+  1602  064D  07B3               	addwf	(_pastError+1)
+  1603  064E  083A               	movf	(_error),w
+  1604  064F  01B2               	clrf	(_pastError)
+  1605  0650  07B2               	addwf	(_pastError)
+  1606                           
+  1607                           	line	226
+  1608                           	
+  1609  0651                     l3595:	
+  1610                           ;robot test 2 - Ch2 yes servo.c: 226: integralError += error;
+  1611  0651  083A               	movf	(_error),w
+  1612  0652  07AE               	addwf	(_integralError),f
+  1613  0653  1803               	skipnc
+  1614  0654  0AAF               	incf	(_integralError+1),f
+  1615  0655  083B               	movf	(_error+1),w
+  1616  0656  07AF               	addwf	(_integralError+1),f
+  1617                           	line	227
+  1618                           	
+  1619  0657                     l3597:	
+  1620                           ;robot test 2 - Ch2 yes servo.c: 227: I_turn = integralError * 1;
+  1621  0657  082F               	movf	(_integralError+1),w
+  1622  0658  01A3               	clrf	(_I_turn+1)
+  1623  0659  07A3               	addwf	(_I_turn+1)
+  1624  065A  082E               	movf	(_integralError),w
+  1625  065B  01A2               	clrf	(_I_turn)
+  1626  065C  07A2               	addwf	(_I_turn)
+  1627                           
+  1628                           	line	229
+  1629                           	
+  1630  065D                     l3599:	
+  1631                           ;robot test 2 - Ch2 yes servo.c: 229: P_turn = 70 * error;
+  1632  065D  083B               	movf	(_error+1),w
+  1633  065E  01F1               	clrf	(?___wmul+1)
+  1634  065F  07F1               	addwf	(?___wmul+1)
+  1635  0660  083A               	movf	(_error),w
+  1636  0661  01F0               	clrf	(?___wmul)
+  1637  0662  07F0               	addwf	(?___wmul)
+  1638                           
+  1639  0663  3046               	movlw	low(046h)
+  1640  0664  00F2               	movwf	0+(?___wmul)+02h
+  1641  0665  3000               	movlw	high(046h)
+  1642  0666  00F3               	movwf	(0+(?___wmul)+02h)+1
+  1643  0667  118A  23F6  118A   	fcall	___wmul
+  1644  066A  0871               	movf	(1+(?___wmul)),w
+  1645  066B  1283               	bcf	status, 5	;RP0=0, select bank0
+  1646  066C  1303               	bcf	status, 6	;RP1=0, select bank0
+  1647  066D  01A7               	clrf	(_P_turn+1)
+  1648  066E  07A7               	addwf	(_P_turn+1)
+  1649  066F  0870               	movf	(0+(?___wmul)),w
+  1650  0670  01A6               	clrf	(_P_turn)
+  1651  0671  07A6               	addwf	(_P_turn)
+  1652                           
+  1653                           	line	231
+  1654                           	
+  1655  0672                     l3601:	
+  1656                           ;robot test 2 - Ch2 yes servo.c: 231: totalTurn = P_turn + I_turn + D_turn;
+  1657  0672  0822               	movf	(_I_turn),w
+  1658  0673  0726               	addwf	(_P_turn),w
+  1659  0674  00FB               	movwf	(??_PID_controller+0)+0
+  1660  0675  0823               	movf	(_I_turn+1),w
+  1661  0676  1803               	skipnc
+  1662  0677  0A23               	incf	(_I_turn+1),w
+  1663  0678  0727               	addwf	(_P_turn+1),w
+  1664  0679  00FC               	movwf	1+(??_PID_controller+0)+0
+  1665  067A  0820               	movf	(_D_turn),w
+  1666  067B  077B               	addwf	0+(??_PID_controller+0)+0,w
+  1667  067C  00BC               	movwf	(_totalTurn)
+  1668  067D  0821               	movf	(_D_turn+1),w
+  1669  067E  1803               	skipnc
+  1670  067F  0A21               	incf	(_D_turn+1),w
+  1671  0680  077C               	addwf	1+(??_PID_controller+0)+0,w
+  1672  0681  00BD               	movwf	1+(_totalTurn)
+  1673                           	line	232
+  1674                           	
+  1675  0682                     l3603:	
+  1676                           ;robot test 2 - Ch2 yes servo.c: 232: totalTurn = totalTurn / 100;
+  1677  0682  3064               	movlw	low(064h)
+  1678  0683  00F6               	movwf	(?___awdiv)
+  1679  0684  3000               	movlw	high(064h)
+  1680  0685  00F7               	movwf	((?___awdiv))+1
+  1681  0686  083D               	movf	(_totalTurn+1),w
+  1682  0687  01F9               	clrf	1+(?___awdiv)+02h
+  1683  0688  07F9               	addwf	1+(?___awdiv)+02h
+  1684  0689  083C               	movf	(_totalTurn),w
+  1685  068A  01F8               	clrf	0+(?___awdiv)+02h
+  1686  068B  07F8               	addwf	0+(?___awdiv)+02h
+  1687                           
+  1688  068C  118A  25A0  118A   	fcall	___awdiv
+  1689  068F  0877               	movf	(1+(?___awdiv)),w
+  1690  0690  1283               	bcf	status, 5	;RP0=0, select bank0
+  1691  0691  1303               	bcf	status, 6	;RP1=0, select bank0
+  1692  0692  01BD               	clrf	(_totalTurn+1)
+  1693  0693  07BD               	addwf	(_totalTurn+1)
+  1694  0694  0876               	movf	(0+(?___awdiv)),w
+  1695  0695  01BC               	clrf	(_totalTurn)
+  1696  0696  07BC               	addwf	(_totalTurn)
+  1697                           
+  1698                           	line	233
+  1699                           	
+  1700  0697                     l987:	
+  1701  0697  0008               	return
+  1702                           	opt stack 0
+  1703                           GLOBAL	__end_of_PID_controller
+  1704  0698                     	__end_of_PID_controller:
+  1705 ;; =============== function _PID_controller ends ============
+  1706                           
+  1707                           	signat	_PID_controller,88
+  1708                           	global	_ADC_convert
+  1709                           psect	text392,local,class=CODE,delta=2
+  1710                           global __ptext392
+  1711  04F2                     __ptext392:
+  1712                           
+  1713 ;; *************** function _ADC_convert *****************
+  1714 ;; Defined at:
+  1715 ;;		line 158 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  1716 ;; Parameters:    Size  Location     Type
+  1717 ;;		None
+  1718 ;; Auto vars:     Size  Location     Type
+  1719 ;;		None
+  1720 ;; Return value:  Size  Location     Type
+  1721 ;;		None               void
+  1722 ;; Registers used:
+  1723 ;;		wreg, status,2, status,0, pclath, cstack
+  1724 ;; Tracked objects:
+  1725 ;;		On entry : 0/0
+  1726 ;;		On exit  : 0/0
+  1727 ;;		Unchanged: 0/0
+  1728 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  1729 ;;      Params:         0       0       0       0
+  1730 ;;      Locals:         0       0       0       0
+  1731 ;;      Temps:          2       0       0       0
+  1732 ;;      Totals:         2       0       0       0
+  1733 ;;Total ram usage:        2 bytes
+  1734 ;; Hardware stack levels used:    1
+  1735 ;; Hardware stack levels required when called:    1
+  1736 ;; This function calls:
+  1737 ;;		___wmul
+  1738 ;;		___awdiv
+  1739 ;; This function is called by:
+  1740 ;;		_main
+  1741 ;;		_move_180
+  1742 ;; This function uses a non-reentrant model
+  1743 ;;
+  1744                           psect	text392
+  1745                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  1746                           	line	158
+  1747                           	global	__size_of_ADC_convert
+  1748  0052                     	__size_of_ADC_convert	equ	__end_of_ADC_convert-_ADC_convert
+  1749                           	
+  1750  04F2                     _ADC_convert:	
+  1751                           	opt	stack 4
+  1752                           ; Regs used in _ADC_convert: [wreg+status,2+status,0+pclath+cstack]
+  1753                           	line	159
+  1754                           	
+  1755  04F2                     l3573:	
+  1756                           ;robot test 2 - Ch2 yes servo.c: 159: ADCON0 = 0b00101001;
+  1757  04F2  3029               	movlw	(029h)
+  1758  04F3  1283               	bcf	status, 5	;RP0=0, select bank0
+  1759  04F4  1303               	bcf	status, 6	;RP1=0, select bank0
+  1760  04F5  009F               	movwf	(31)	;volatile
+  1761                           	line	160
+  1762                           	
+  1763  04F6                     l3575:	
+  1764                           ;robot test 2 - Ch2 yes servo.c: 160: GO_nDONE = 1;
+  1765  04F6  149F               	bsf	(249/8),(249)&7
+  1766                           	line	161
+  1767                           ;robot test 2 - Ch2 yes servo.c: 161: while(GO_nDONE != 0){}
+  1768  04F7  2CF8               	goto	l962
+  1769                           	
+  1770  04F8                     l963:	
+  1771                           	
+  1772  04F8                     l962:	
+  1773  04F8  189F               	btfsc	(249/8),(249)&7
+  1774  04F9  2CFB               	goto	u2721
+  1775  04FA  2CFC               	goto	u2720
+  1776  04FB                     u2721:
+  1777  04FB  2CF8               	goto	l962
+  1778  04FC                     u2720:
+  1779  04FC  2CFD               	goto	l3577
+  1780                           	
+  1781  04FD                     l964:	
+  1782                           	line	162
+  1783                           	
+  1784  04FD                     l3577:	
+  1785                           ;robot test 2 - Ch2 yes servo.c: 162: readSensR = ADRESH;
+  1786  04FD  081E               	movf	(30),w	;volatile
+  1787  04FE  00FB               	movwf	(??_ADC_convert+0)+0
+  1788  04FF  01FC               	clrf	(??_ADC_convert+0)+0+1
+  1789  0500  087B               	movf	0+(??_ADC_convert+0)+0,w
+  1790  0501  00B6               	movwf	(_readSensR)
+  1791  0502  087C               	movf	1+(??_ADC_convert+0)+0,w
+  1792  0503  00B7               	movwf	(_readSensR+1)
+  1793                           	line	164
+  1794                           	
+  1795  0504                     l3579:	
+  1796                           ;robot test 2 - Ch2 yes servo.c: 164: _delay(5);
+  1797                           		opt asmopt_off
+  1798  0504  2D05               	nop2	;2 cycle nop
+  1799                           	opt asmopt_on
+  1800                           	opt asmopt_off
+  1801  0505  2D06               	nop2	;2 cycle nop
+  1802                           	opt asmopt_on
+  1803                           	opt asmopt_off
+  1804  0506  0064               	clrwdt
+  1805                           	opt asmopt_on
+  1806                           
+  1807                           	line	166
+  1808                           ;robot test 2 - Ch2 yes servo.c: 166: ADCON0 = 0b00101101;
+  1809  0507  302D               	movlw	(02Dh)
+  1810  0508  1283               	bcf	status, 5	;RP0=0, select bank0
+  1811  0509  1303               	bcf	status, 6	;RP1=0, select bank0
+  1812  050A  009F               	movwf	(31)	;volatile
+  1813                           	line	167
+  1814                           	
+  1815  050B                     l3581:	
+  1816                           ;robot test 2 - Ch2 yes servo.c: 167: GO_nDONE = 1;
+  1817  050B  149F               	bsf	(249/8),(249)&7
+  1818                           	line	168
+  1819                           ;robot test 2 - Ch2 yes servo.c: 168: while(GO_nDONE != 0){}
+  1820  050C  2D0D               	goto	l965
+  1821                           	
+  1822  050D                     l966:	
+  1823                           	
+  1824  050D                     l965:	
+  1825  050D  189F               	btfsc	(249/8),(249)&7
+  1826  050E  2D10               	goto	u2731
+  1827  050F  2D11               	goto	u2730
+  1828  0510                     u2731:
+  1829  0510  2D0D               	goto	l965
+  1830  0511                     u2730:
+  1831  0511  2D12               	goto	l3583
+  1832                           	
+  1833  0512                     l967:	
+  1834                           	line	169
+  1835                           	
+  1836  0512                     l3583:	
+  1837                           ;robot test 2 - Ch2 yes servo.c: 169: readSensL = ADRESH;
+  1838  0512  081E               	movf	(30),w	;volatile
+  1839  0513  00FB               	movwf	(??_ADC_convert+0)+0
+  1840  0514  01FC               	clrf	(??_ADC_convert+0)+0+1
+  1841  0515  087B               	movf	0+(??_ADC_convert+0)+0,w
+  1842  0516  00B4               	movwf	(_readSensL)
+  1843  0517  087C               	movf	1+(??_ADC_convert+0)+0,w
+  1844  0518  00B5               	movwf	(_readSensL+1)
+  1845                           	line	171
+  1846                           	
+  1847  0519                     l3585:	
+  1848                           ;robot test 2 - Ch2 yes servo.c: 171: readSensR = readSensR * 9 / 10;
+  1849  0519  300A               	movlw	low(0Ah)
+  1850  051A  00F6               	movwf	(?___awdiv)
+  1851  051B  3000               	movlw	high(0Ah)
+  1852  051C  00F7               	movwf	((?___awdiv))+1
+  1853  051D  0837               	movf	(_readSensR+1),w
+  1854  051E  01F1               	clrf	(?___wmul+1)
+  1855  051F  07F1               	addwf	(?___wmul+1)
+  1856  0520  0836               	movf	(_readSensR),w
+  1857  0521  01F0               	clrf	(?___wmul)
+  1858  0522  07F0               	addwf	(?___wmul)
+  1859                           
+  1860  0523  3009               	movlw	low(09h)
+  1861  0524  00F2               	movwf	0+(?___wmul)+02h
+  1862  0525  3000               	movlw	high(09h)
+  1863  0526  00F3               	movwf	(0+(?___wmul)+02h)+1
+  1864  0527  118A  23F6  118A   	fcall	___wmul
+  1865  052A  0871               	movf	(1+(?___wmul)),w
+  1866  052B  01F9               	clrf	1+(?___awdiv)+02h
+  1867  052C  07F9               	addwf	1+(?___awdiv)+02h
+  1868  052D  0870               	movf	(0+(?___wmul)),w
+  1869  052E  01F8               	clrf	0+(?___awdiv)+02h
+  1870  052F  07F8               	addwf	0+(?___awdiv)+02h
+  1871                           
+  1872  0530  118A  25A0  118A   	fcall	___awdiv
+  1873  0533  0877               	movf	(1+(?___awdiv)),w
+  1874  0534  1283               	bcf	status, 5	;RP0=0, select bank0
+  1875  0535  1303               	bcf	status, 6	;RP1=0, select bank0
+  1876  0536  01B7               	clrf	(_readSensR+1)
+  1877  0537  07B7               	addwf	(_readSensR+1)
+  1878  0538  0876               	movf	(0+(?___awdiv)),w
+  1879  0539  01B6               	clrf	(_readSensR)
+  1880  053A  07B6               	addwf	(_readSensR)
+  1881                           
+  1882                           	line	172
+  1883                           	
+  1884  053B                     l3587:	
+  1885                           ;robot test 2 - Ch2 yes servo.c: 172: readSensR = readSensR + 25;
+  1886  053B  0836               	movf	(_readSensR),w
+  1887  053C  3E19               	addlw	low(019h)
+  1888  053D  00B6               	movwf	(_readSensR)
+  1889  053E  0837               	movf	(_readSensR+1),w
+  1890  053F  1803               	skipnc
+  1891  0540  3E01               	addlw	1
+  1892  0541  3E00               	addlw	high(019h)
+  1893  0542  00B7               	movwf	1+(_readSensR)
+  1894                           	line	173
+  1895                           	
+  1896  0543                     l968:	
+  1897  0543  0008               	return
+  1898                           	opt stack 0
+  1899                           GLOBAL	__end_of_ADC_convert
+  1900  0544                     	__end_of_ADC_convert:
+  1901 ;; =============== function _ADC_convert ends ============
+  1902                           
+  1903                           	signat	_ADC_convert,88
+  1904                           	global	___awdiv
+  1905                           psect	text393,local,class=CODE,delta=2
+  1906                           global __ptext393
+  1907  05A0                     __ptext393:
+  1908                           
+  1909 ;; *************** function ___awdiv *****************
+  1910 ;; Defined at:
+  1911 ;;		line 5 in file "C:\Program Files (x86)\HI-TECH Software\PICC\9.83\sources\awdiv.c"
+  1912 ;; Parameters:    Size  Location     Type
+  1913 ;;  divisor         2    6[COMMON] int 
+  1914 ;;  dividend        2    8[COMMON] int 
+  1915 ;; Auto vars:     Size  Location     Type
+  1916 ;;  quotient        2    2[BANK0 ] int 
+  1917 ;;  sign            1    1[BANK0 ] unsigned char 
+  1918 ;;  counter         1    0[BANK0 ] unsigned char 
+  1919 ;; Return value:  Size  Location     Type
+  1920 ;;                  2    6[COMMON] int 
+  1921 ;; Registers used:
+  1922 ;;		wreg, status,2, status,0
+  1923 ;; Tracked objects:
+  1924 ;;		On entry : 0/0
+  1925 ;;		On exit  : 0/0
+  1926 ;;		Unchanged: 0/0
+  1927 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  1928 ;;      Params:         4       0       0       0
+  1929 ;;      Locals:         0       4       0       0
+  1930 ;;      Temps:          1       0       0       0
+  1931 ;;      Totals:         5       4       0       0
+  1932 ;;Total ram usage:        9 bytes
+  1933 ;; Hardware stack levels used:    1
+  1934 ;; This function calls:
+  1935 ;;		Nothing
+  1936 ;; This function is called by:
+  1937 ;;		_ADC_convert
+  1938 ;;		_PID_controller
+  1939 ;; This function uses a non-reentrant model
+  1940 ;;
+  1941                           psect	text393
+  1942                           	file	"C:\Program Files (x86)\HI-TECH Software\PICC\9.83\sources\awdiv.c"
+  1943                           	line	5
+  1944                           	global	__size_of___awdiv
+  1945  0076                     	__size_of___awdiv	equ	__end_of___awdiv-___awdiv
+  1946                           	
+  1947  05A0                     ___awdiv:	
+  1948                           	opt	stack 4
+  1949                           ; Regs used in ___awdiv: [wreg+status,2+status,0]
+  1950                           	line	9
+  1951                           	
+  1952  05A0                     l3533:	
+  1953  05A0  1283               	bcf	status, 5	;RP0=0, select bank0
+  1954  05A1  1303               	bcf	status, 6	;RP1=0, select bank0
+  1955  05A2  01BF               	clrf	(___awdiv@sign)
+  1956                           	line	10
+  1957  05A3  1FF7               	btfss	(___awdiv@divisor+1),7
+  1958  05A4  2DA6               	goto	u2621
+  1959  05A5  2DA7               	goto	u2620
+  1960  05A6                     u2621:
+  1961  05A6  2DB0               	goto	l3537
+  1962  05A7                     u2620:
+  1963                           	line	11
+  1964                           	
+  1965  05A7                     l3535:	
+  1966  05A7  09F6               	comf	(___awdiv@divisor),f
+  1967  05A8  09F7               	comf	(___awdiv@divisor+1),f
+  1968  05A9  0AF6               	incf	(___awdiv@divisor),f
+  1969  05AA  1903               	skipnz
+  1970  05AB  0AF7               	incf	(___awdiv@divisor+1),f
+  1971                           	line	12
+  1972  05AC  01BF               	clrf	(___awdiv@sign)
+  1973  05AD  1403               	bsf	status,0
+  1974  05AE  0DBF               	rlf	(___awdiv@sign),f
+  1975  05AF  2DB0               	goto	l3537
+  1976                           	line	13
+  1977                           	
+  1978  05B0                     l2035:	
+  1979                           	line	14
+  1980                           	
+  1981  05B0                     l3537:	
+  1982  05B0  1FF9               	btfss	(___awdiv@dividend+1),7
+  1983  05B1  2DB3               	goto	u2631
+  1984  05B2  2DB4               	goto	u2630
+  1985  05B3                     u2631:
+  1986  05B3  2DBE               	goto	l3543
+  1987  05B4                     u2630:
+  1988                           	line	15
+  1989                           	
+  1990  05B4                     l3539:	
+  1991  05B4  09F8               	comf	(___awdiv@dividend),f
+  1992  05B5  09F9               	comf	(___awdiv@dividend+1),f
+  1993  05B6  0AF8               	incf	(___awdiv@dividend),f
+  1994  05B7  1903               	skipnz
+  1995  05B8  0AF9               	incf	(___awdiv@dividend+1),f
+  1996                           	line	16
+  1997                           	
+  1998  05B9                     l3541:	
+  1999  05B9  3001               	movlw	(01h)
+  2000  05BA  00FA               	movwf	(??___awdiv+0)+0
+  2001  05BB  087A               	movf	(??___awdiv+0)+0,w
+  2002  05BC  06BF               	xorwf	(___awdiv@sign),f
+  2003  05BD  2DBE               	goto	l3543
+  2004                           	line	17
+  2005                           	
+  2006  05BE                     l2036:	
+  2007                           	line	18
+  2008                           	
+  2009  05BE                     l3543:	
+  2010  05BE  01C0               	clrf	(___awdiv@quotient)
+  2011  05BF  01C1               	clrf	(___awdiv@quotient+1)
+  2012                           	line	19
+  2013                           	
+  2014  05C0                     l3545:	
+  2015  05C0  0877               	movf	(___awdiv@divisor+1),w
+  2016  05C1  0476               	iorwf	(___awdiv@divisor),w
+  2017  05C2  1903               	skipnz
+  2018  05C3  2DC5               	goto	u2641
+  2019  05C4  2DC6               	goto	u2640
+  2020  05C5                     u2641:
+  2021  05C5  2E04               	goto	l3565
+  2022  05C6                     u2640:
+  2023                           	line	20
+  2024                           	
+  2025  05C6                     l3547:	
+  2026  05C6  01BE               	clrf	(___awdiv@counter)
+  2027  05C7  1403               	bsf	status,0
+  2028  05C8  0DBE               	rlf	(___awdiv@counter),f
+  2029                           	line	21
+  2030  05C9  2DD6               	goto	l3553
+  2031                           	
+  2032  05CA                     l2039:	
+  2033                           	line	22
+  2034                           	
+  2035  05CA                     l3549:	
+  2036  05CA  3001               	movlw	01h
+  2037                           	
+  2038  05CB                     u2655:
+  2039  05CB  1003               	clrc
+  2040  05CC  0DF6               	rlf	(___awdiv@divisor),f
+  2041  05CD  0DF7               	rlf	(___awdiv@divisor+1),f
+  2042  05CE  3EFF               	addlw	-1
+  2043  05CF  1D03               	skipz
+  2044  05D0  2DCB               	goto	u2655
+  2045                           	line	23
+  2046                           	
+  2047  05D1                     l3551:	
+  2048  05D1  3001               	movlw	(01h)
+  2049  05D2  00FA               	movwf	(??___awdiv+0)+0
+  2050  05D3  087A               	movf	(??___awdiv+0)+0,w
+  2051  05D4  07BE               	addwf	(___awdiv@counter),f
+  2052  05D5  2DD6               	goto	l3553
+  2053                           	line	24
+  2054                           	
+  2055  05D6                     l2038:	
+  2056                           	line	21
+  2057                           	
+  2058  05D6                     l3553:	
+  2059  05D6  1FF7               	btfss	(___awdiv@divisor+1),(15)&7
+  2060  05D7  2DD9               	goto	u2661
+  2061  05D8  2DDA               	goto	u2660
+  2062  05D9                     u2661:
+  2063  05D9  2DCA               	goto	l3549
+  2064  05DA                     u2660:
+  2065  05DA  2DDC               	goto	l3555
+  2066                           	
+  2067  05DB                     l2040:	
+  2068  05DB  2DDC               	goto	l3555
+  2069                           	line	25
+  2070                           	
+  2071  05DC                     l2041:	
+  2072                           	line	26
+  2073                           	
+  2074  05DC                     l3555:	
+  2075  05DC  3001               	movlw	01h
+  2076                           	
+  2077  05DD                     u2675:
+  2078  05DD  1003               	clrc
+  2079  05DE  0DC0               	rlf	(___awdiv@quotient),f
+  2080  05DF  0DC1               	rlf	(___awdiv@quotient+1),f
+  2081  05E0  3EFF               	addlw	-1
+  2082  05E1  1D03               	skipz
+  2083  05E2  2DDD               	goto	u2675
+  2084                           	line	27
+  2085  05E3  0877               	movf	(___awdiv@divisor+1),w
+  2086  05E4  0279               	subwf	(___awdiv@dividend+1),w
+  2087  05E5  1D03               	skipz
+  2088  05E6  2DE9               	goto	u2685
+  2089  05E7  0876               	movf	(___awdiv@divisor),w
+  2090  05E8  0278               	subwf	(___awdiv@dividend),w
+  2091  05E9                     u2685:
+  2092  05E9  1C03               	skipc
+  2093  05EA  2DEC               	goto	u2681
+  2094  05EB  2DED               	goto	u2680
+  2095  05EC                     u2681:
+  2096  05EC  2DF5               	goto	l3561
+  2097  05ED                     u2680:
+  2098                           	line	28
+  2099                           	
+  2100  05ED                     l3557:	
+  2101  05ED  0876               	movf	(___awdiv@divisor),w
+  2102  05EE  02F8               	subwf	(___awdiv@dividend),f
+  2103  05EF  0877               	movf	(___awdiv@divisor+1),w
+  2104  05F0  1C03               	skipc
+  2105  05F1  03F9               	decf	(___awdiv@dividend+1),f
+  2106  05F2  02F9               	subwf	(___awdiv@dividend+1),f
+  2107                           	line	29
+  2108                           	
+  2109  05F3                     l3559:	
+  2110  05F3  1440               	bsf	(___awdiv@quotient)+(0/8),(0)&7
+  2111  05F4  2DF5               	goto	l3561
+  2112                           	line	30
+  2113                           	
+  2114  05F5                     l2042:	
+  2115                           	line	31
+  2116                           	
+  2117  05F5                     l3561:	
+  2118  05F5  3001               	movlw	01h
+  2119                           	
+  2120  05F6                     u2695:
+  2121  05F6  1003               	clrc
+  2122  05F7  0CF7               	rrf	(___awdiv@divisor+1),f
+  2123  05F8  0CF6               	rrf	(___awdiv@divisor),f
+  2124  05F9  3EFF               	addlw	-1
+  2125  05FA  1D03               	skipz
+  2126  05FB  2DF6               	goto	u2695
+  2127                           	line	32
+  2128                           	
+  2129  05FC                     l3563:	
+  2130  05FC  3001               	movlw	low(01h)
+  2131  05FD  02BE               	subwf	(___awdiv@counter),f
+  2132  05FE  1D03               	btfss	status,2
+  2133  05FF  2E01               	goto	u2701
+  2134  0600  2E02               	goto	u2700
+  2135  0601                     u2701:
+  2136  0601  2DDC               	goto	l3555
+  2137  0602                     u2700:
+  2138  0602  2E04               	goto	l3565
+  2139                           	
+  2140  0603                     l2043:	
+  2141  0603  2E04               	goto	l3565
+  2142                           	line	33
+  2143                           	
+  2144  0604                     l2037:	
+  2145                           	line	34
+  2146                           	
+  2147  0604                     l3565:	
+  2148  0604  083F               	movf	(___awdiv@sign),w
+  2149  0605  1D03               	skipz
+  2150  0606  2E08               	goto	u2710
+  2151  0607  2E0E               	goto	l3569
+  2152  0608                     u2710:
+  2153                           	line	35
+  2154                           	
+  2155  0608                     l3567:	
+  2156  0608  09C0               	comf	(___awdiv@quotient),f
+  2157  0609  09C1               	comf	(___awdiv@quotient+1),f
+  2158  060A  0AC0               	incf	(___awdiv@quotient),f
+  2159  060B  1903               	skipnz
+  2160  060C  0AC1               	incf	(___awdiv@quotient+1),f
+  2161  060D  2E0E               	goto	l3569
+  2162                           	
+  2163  060E                     l2044:	
+  2164                           	line	36
+  2165                           	
+  2166  060E                     l3569:	
+  2167  060E  0841               	movf	(___awdiv@quotient+1),w
+  2168  060F  01F7               	clrf	(?___awdiv+1)
+  2169  0610  07F7               	addwf	(?___awdiv+1)
+  2170  0611  0840               	movf	(___awdiv@quotient),w
+  2171  0612  01F6               	clrf	(?___awdiv)
+  2172  0613  07F6               	addwf	(?___awdiv)
+  2173                           
+  2174  0614  2E15               	goto	l2045
+  2175                           	
+  2176  0615                     l3571:	
+  2177                           	line	37
+  2178                           	
+  2179  0615                     l2045:	
+  2180  0615  0008               	return
+  2181                           	opt stack 0
+  2182                           GLOBAL	__end_of___awdiv
+  2183  0616                     	__end_of___awdiv:
+  2184 ;; =============== function ___awdiv ends ============
+  2185                           
+  2186                           	signat	___awdiv,8314
+  2187                           	global	___wmul
+  2188                           psect	text394,local,class=CODE,delta=2
+  2189                           global __ptext394
+  2190  03F6                     __ptext394:
+  2191                           
+  2192 ;; *************** function ___wmul *****************
+  2193 ;; Defined at:
+  2194 ;;		line 3 in file "C:\Program Files (x86)\HI-TECH Software\PICC\9.83\sources\wmul.c"
+  2195 ;; Parameters:    Size  Location     Type
+  2196 ;;  multiplier      2    0[COMMON] unsigned int 
+  2197 ;;  multiplicand    2    2[COMMON] unsigned int 
+  2198 ;; Auto vars:     Size  Location     Type
+  2199 ;;  product         2    4[COMMON] unsigned int 
+  2200 ;; Return value:  Size  Location     Type
+  2201 ;;                  2    0[COMMON] unsigned int 
+  2202 ;; Registers used:
+  2203 ;;		wreg, status,2, status,0
+  2204 ;; Tracked objects:
+  2205 ;;		On entry : 0/0
+  2206 ;;		On exit  : 0/0
+  2207 ;;		Unchanged: 0/0
+  2208 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  2209 ;;      Params:         4       0       0       0
+  2210 ;;      Locals:         2       0       0       0
+  2211 ;;      Temps:          0       0       0       0
+  2212 ;;      Totals:         6       0       0       0
+  2213 ;;Total ram usage:        6 bytes
+  2214 ;; Hardware stack levels used:    1
+  2215 ;; This function calls:
+  2216 ;;		Nothing
+  2217 ;; This function is called by:
+  2218 ;;		_ADC_convert
+  2219 ;;		_PID_controller
+  2220 ;; This function uses a non-reentrant model
+  2221 ;;
+  2222                           psect	text394
+  2223                           	file	"C:\Program Files (x86)\HI-TECH Software\PICC\9.83\sources\wmul.c"
+  2224                           	line	3
+  2225                           	global	__size_of___wmul
+  2226  002A                     	__size_of___wmul	equ	__end_of___wmul-___wmul
+  2227                           	
+  2228  03F6                     ___wmul:	
+  2229                           	opt	stack 4
+  2230                           ; Regs used in ___wmul: [wreg+status,2+status,0]
+  2231                           	line	4
+  2232                           	
+  2233  03F6                     l3521:	
+  2234  03F6  01F4               	clrf	(___wmul@product)
+  2235  03F7  01F5               	clrf	(___wmul@product+1)
+  2236  03F8  2BF9               	goto	l3523
+  2237                           	line	6
+  2238                           	
+  2239  03F9                     l1895:	
+  2240                           	line	7
+  2241                           	
+  2242  03F9                     l3523:	
+  2243  03F9  1C70               	btfss	(___wmul@multiplier),(0)&7
+  2244  03FA  2BFC               	goto	u2581
+  2245  03FB  2BFD               	goto	u2580
+  2246  03FC                     u2581:
+  2247  03FC  2C03               	goto	l1896
+  2248  03FD                     u2580:
+  2249                           	line	8
+  2250                           	
+  2251  03FD                     l3525:	
+  2252  03FD  0872               	movf	(___wmul@multiplicand),w
+  2253  03FE  07F4               	addwf	(___wmul@product),f
+  2254  03FF  1803               	skipnc
+  2255  0400  0AF5               	incf	(___wmul@product+1),f
+  2256  0401  0873               	movf	(___wmul@multiplicand+1),w
+  2257  0402  07F5               	addwf	(___wmul@product+1),f
+  2258                           	
+  2259  0403                     l1896:	
+  2260                           	line	9
+  2261  0403  3001               	movlw	01h
+  2262                           	
+  2263  0404                     u2595:
+  2264  0404  1003               	clrc
+  2265  0405  0DF2               	rlf	(___wmul@multiplicand),f
+  2266  0406  0DF3               	rlf	(___wmul@multiplicand+1),f
+  2267  0407  3EFF               	addlw	-1
+  2268  0408  1D03               	skipz
+  2269  0409  2C04               	goto	u2595
+  2270                           	line	10
+  2271                           	
+  2272  040A                     l3527:	
+  2273  040A  3001               	movlw	01h
+  2274                           	
+  2275  040B                     u2605:
+  2276  040B  1003               	clrc
+  2277  040C  0CF1               	rrf	(___wmul@multiplier+1),f
+  2278  040D  0CF0               	rrf	(___wmul@multiplier),f
+  2279  040E  3EFF               	addlw	-1
+  2280  040F  1D03               	skipz
+  2281  0410  2C0B               	goto	u2605
+  2282                           	line	11
+  2283  0411  0871               	movf	((___wmul@multiplier+1)),w
+  2284  0412  0470               	iorwf	((___wmul@multiplier)),w
+  2285  0413  1D03               	skipz
+  2286  0414  2C16               	goto	u2611
+  2287  0415  2C17               	goto	u2610
+  2288  0416                     u2611:
+  2289  0416  2BF9               	goto	l3523
+  2290  0417                     u2610:
+  2291  0417  2C18               	goto	l3529
+  2292                           	
+  2293  0418                     l1897:	
+  2294                           	line	12
+  2295                           	
+  2296  0418                     l3529:	
+  2297  0418  0875               	movf	(___wmul@product+1),w
+  2298  0419  01F1               	clrf	(?___wmul+1)
+  2299  041A  07F1               	addwf	(?___wmul+1)
+  2300  041B  0874               	movf	(___wmul@product),w
+  2301  041C  01F0               	clrf	(?___wmul)
+  2302  041D  07F0               	addwf	(?___wmul)
+  2303                           
+  2304  041E  2C1F               	goto	l1898
+  2305                           	
+  2306  041F                     l3531:	
+  2307                           	line	13
+  2308                           	
+  2309  041F                     l1898:	
+  2310  041F  0008               	return
+  2311                           	opt stack 0
+  2312                           GLOBAL	__end_of___wmul
+  2313  0420                     	__end_of___wmul:
+  2314 ;; =============== function ___wmul ends ============
+  2315                           
+  2316                           	signat	___wmul,8314
+  2317                           	global	_servo_on
+  2318                           psect	text395,local,class=CODE,delta=2
+  2319                           global __ptext395
+  2320  03AB                     __ptext395:
+  2321                           
+  2322 ;; *************** function _servo_on *****************
+  2323 ;; Defined at:
+  2324 ;;		line 334 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  2325 ;; Parameters:    Size  Location     Type
+  2326 ;;		None
+  2327 ;; Auto vars:     Size  Location     Type
+  2328 ;;		None
+  2329 ;; Return value:  Size  Location     Type
+  2330 ;;		None               void
+  2331 ;; Registers used:
+  2332 ;;		None
+  2333 ;; Tracked objects:
+  2334 ;;		On entry : 0/0
+  2335 ;;		On exit  : 0/0
+  2336 ;;		Unchanged: 0/0
+  2337 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  2338 ;;      Params:         0       0       0       0
+  2339 ;;      Locals:         0       0       0       0
+  2340 ;;      Temps:          0       0       0       0
+  2341 ;;      Totals:         0       0       0       0
+  2342 ;;Total ram usage:        0 bytes
+  2343 ;; Hardware stack levels used:    1
+  2344 ;; This function calls:
+  2345 ;;		Nothing
+  2346 ;; This function is called by:
+  2347 ;;		_black_black_check
+  2348 ;; This function uses a non-reentrant model
+  2349 ;;
+  2350                           psect	text395
+  2351                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  2352                           	line	334
+  2353                           	global	__size_of_servo_on
+  2354  0004                     	__size_of_servo_on	equ	__end_of_servo_on-_servo_on
+  2355                           	
+  2356  03AB                     _servo_on:	
+  2357                           	opt	stack 6
+  2358                           ; Regs used in _servo_on: []
+  2359                           	line	335
+  2360                           	
+  2361  03AB                     l3519:	
+  2362                           ;robot test 2 - Ch2 yes servo.c: 335: RC2 = 0;
+  2363  03AB  1283               	bcf	status, 5	;RP0=0, select bank0
+  2364  03AC  1303               	bcf	status, 6	;RP1=0, select bank0
+  2365  03AD  1107               	bcf	(58/8),(58)&7
+  2366                           	line	336
+  2367                           	
+  2368  03AE                     l1015:	
+  2369  03AE  0008               	return
+  2370                           	opt stack 0
+  2371                           GLOBAL	__end_of_servo_on
+  2372  03AF                     	__end_of_servo_on:
+  2373 ;; =============== function _servo_on ends ============
+  2374                           
+  2375                           	signat	_servo_on,88
+  2376                           	global	_servo_off
+  2377                           psect	text396,local,class=CODE,delta=2
+  2378                           global __ptext396
+  2379  03A7                     __ptext396:
+  2380                           
+  2381 ;; *************** function _servo_off *****************
+  2382 ;; Defined at:
+  2383 ;;		line 338 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  2384 ;; Parameters:    Size  Location     Type
+  2385 ;;		None
+  2386 ;; Auto vars:     Size  Location     Type
+  2387 ;;		None
+  2388 ;; Return value:  Size  Location     Type
+  2389 ;;		None               void
+  2390 ;; Registers used:
+  2391 ;;		None
+  2392 ;; Tracked objects:
+  2393 ;;		On entry : 0/0
+  2394 ;;		On exit  : 0/0
+  2395 ;;		Unchanged: 0/0
+  2396 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  2397 ;;      Params:         0       0       0       0
+  2398 ;;      Locals:         0       0       0       0
+  2399 ;;      Temps:          0       0       0       0
+  2400 ;;      Totals:         0       0       0       0
+  2401 ;;Total ram usage:        0 bytes
+  2402 ;; Hardware stack levels used:    1
+  2403 ;; This function calls:
+  2404 ;;		Nothing
+  2405 ;; This function is called by:
+  2406 ;;		_black_black_check
+  2407 ;; This function uses a non-reentrant model
+  2408 ;;
+  2409                           psect	text396
+  2410                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  2411                           	line	338
+  2412                           	global	__size_of_servo_off
+  2413  0004                     	__size_of_servo_off	equ	__end_of_servo_off-_servo_off
+  2414                           	
+  2415  03A7                     _servo_off:	
+  2416                           	opt	stack 6
+  2417                           ; Regs used in _servo_off: []
+  2418                           	line	339
+  2419                           	
+  2420  03A7                     l3517:	
+  2421                           ;robot test 2 - Ch2 yes servo.c: 339: RC2 = 1;
+  2422  03A7  1283               	bcf	status, 5	;RP0=0, select bank0
+  2423  03A8  1303               	bcf	status, 6	;RP1=0, select bank0
+  2424  03A9  1507               	bsf	(58/8),(58)&7
+  2425                           	line	340
+  2426                           	
+  2427  03AA                     l1018:	
+  2428  03AA  0008               	return
+  2429                           	opt stack 0
+  2430                           GLOBAL	__end_of_servo_off
+  2431  03AB                     	__end_of_servo_off:
+  2432 ;; =============== function _servo_off ends ============
+  2433                           
+  2434                           	signat	_servo_off,88
+  2435                           	global	_move_stop
+  2436                           psect	text397,local,class=CODE,delta=2
+  2437                           global __ptext397
+  2438  03AF                     __ptext397:
+  2439                           
+  2440 ;; *************** function _move_stop *****************
+  2441 ;; Defined at:
+  2442 ;;		line 372 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  2443 ;; Parameters:    Size  Location     Type
+  2444 ;;		None
+  2445 ;; Auto vars:     Size  Location     Type
+  2446 ;;		None
+  2447 ;; Return value:  Size  Location     Type
+  2448 ;;		None               void
+  2449 ;; Registers used:
+  2450 ;;		None
+  2451 ;; Tracked objects:
+  2452 ;;		On entry : 0/0
+  2453 ;;		On exit  : 0/0
+  2454 ;;		Unchanged: 0/0
+  2455 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  2456 ;;      Params:         0       0       0       0
+  2457 ;;      Locals:         0       0       0       0
+  2458 ;;      Temps:          0       0       0       0
+  2459 ;;      Totals:         0       0       0       0
+  2460 ;;Total ram usage:        0 bytes
+  2461 ;; Hardware stack levels used:    1
+  2462 ;; This function calls:
+  2463 ;;		Nothing
+  2464 ;; This function is called by:
+  2465 ;;		_main
+  2466 ;;		_black_black_check
+  2467 ;; This function uses a non-reentrant model
+  2468 ;;
+  2469                           psect	text397
+  2470                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  2471                           	line	372
+  2472                           	global	__size_of_move_stop
+  2473  0007                     	__size_of_move_stop	equ	__end_of_move_stop-_move_stop
+  2474                           	
+  2475  03AF                     _move_stop:	
+  2476                           	opt	stack 7
+  2477                           ; Regs used in _move_stop: []
+  2478                           	line	373
+  2479                           	
+  2480  03AF                     l3515:	
+  2481                           ;robot test 2 - Ch2 yes servo.c: 373: RC6 = 0;
+  2482  03AF  1283               	bcf	status, 5	;RP0=0, select bank0
+  2483  03B0  1303               	bcf	status, 6	;RP1=0, select bank0
+  2484  03B1  1307               	bcf	(62/8),(62)&7
+  2485                           	line	374
+  2486                           ;robot test 2 - Ch2 yes servo.c: 374: RC3 = 0;
+  2487  03B2  1187               	bcf	(59/8),(59)&7
+  2488                           	line	375
+  2489                           ;robot test 2 - Ch2 yes servo.c: 375: RC5 = 0;
+  2490  03B3  1287               	bcf	(61/8),(61)&7
+  2491                           	line	376
+  2492                           ;robot test 2 - Ch2 yes servo.c: 376: RC4 = 0;
+  2493  03B4  1207               	bcf	(60/8),(60)&7
+  2494                           	line	377
+  2495                           	
+  2496  03B5                     l1030:	
+  2497  03B5  0008               	return
+  2498                           	opt stack 0
+  2499                           GLOBAL	__end_of_move_stop
+  2500  03B6                     	__end_of_move_stop:
+  2501 ;; =============== function _move_stop ends ============
+  2502                           
+  2503                           	signat	_move_stop,88
+  2504                           	global	_PWM_check
+  2505                           psect	text398,local,class=CODE,delta=2
+  2506                           global __ptext398
+  2507  044A                     __ptext398:
+  2508                           
+  2509 ;; *************** function _PWM_check *****************
+  2510 ;; Defined at:
+  2511 ;;		line 280 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  2512 ;; Parameters:    Size  Location     Type
+  2513 ;;		None
+  2514 ;; Auto vars:     Size  Location     Type
+  2515 ;;		None
+  2516 ;; Return value:  Size  Location     Type
+  2517 ;;		None               void
+  2518 ;; Registers used:
+  2519 ;;		wreg
+  2520 ;; Tracked objects:
+  2521 ;;		On entry : 0/0
+  2522 ;;		On exit  : 0/0
+  2523 ;;		Unchanged: 0/0
+  2524 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  2525 ;;      Params:         0       0       0       0
+  2526 ;;      Locals:         0       0       0       0
+  2527 ;;      Temps:          1       0       0       0
+  2528 ;;      Totals:         1       0       0       0
+  2529 ;;Total ram usage:        1 bytes
+  2530 ;; Hardware stack levels used:    1
+  2531 ;; This function calls:
+  2532 ;;		Nothing
+  2533 ;; This function is called by:
+  2534 ;;		_main
+  2535 ;; This function uses a non-reentrant model
+  2536 ;;
+  2537                           psect	text398
+  2538                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  2539                           	line	280
+  2540                           	global	__size_of_PWM_check
+  2541  002B                     	__size_of_PWM_check	equ	__end_of_PWM_check-_PWM_check
+  2542                           	
+  2543  044A                     _PWM_check:	
+  2544                           	opt	stack 7
+  2545                           ; Regs used in _PWM_check: [wreg]
+  2546                           	line	281
+  2547                           	
+  2548  044A                     l3507:	
+  2549                           ;robot test 2 - Ch2 yes servo.c: 281: if(PWMCounter > dutyMotorL)
+  2550  044A  1283               	bcf	status, 5	;RP0=0, select bank0
+  2551  044B  1303               	bcf	status, 6	;RP1=0, select bank0
+  2552  044C  084C               	movf	(_dutyMotorL+1),w
+  2553  044D  3A80               	xorlw	80h
+  2554  044E  00F0               	movwf	(??_PWM_check+0)+0
+  2555  044F  0825               	movf	(_PWMCounter+1),w
+  2556  0450  3A80               	xorlw	80h
+  2557  0451  0270               	subwf	(??_PWM_check+0)+0,w
+  2558  0452  1D03               	skipz
+  2559  0453  2C56               	goto	u2565
+  2560  0454  0824               	movf	(_PWMCounter),w
+  2561  0455  024B               	subwf	(_dutyMotorL),w
+  2562  0456                     u2565:
+  2563                           
+  2564  0456  1803               	skipnc
+  2565  0457  2C59               	goto	u2561
+  2566  0458  2C5A               	goto	u2560
+  2567  0459                     u2561:
+  2568  0459  2C5F               	goto	l3511
+  2569  045A                     u2560:
+  2570                           	line	283
+  2571                           	
+  2572  045A                     l3509:	
+  2573                           ;robot test 2 - Ch2 yes servo.c: 282: {
+  2574                           ;robot test 2 - Ch2 yes servo.c: 283: RC6 = 0;
+  2575  045A  1283               	bcf	status, 5	;RP0=0, select bank0
+  2576  045B  1303               	bcf	status, 6	;RP1=0, select bank0
+  2577  045C  1307               	bcf	(62/8),(62)&7
+  2578                           	line	284
+  2579                           ;robot test 2 - Ch2 yes servo.c: 284: RC3 = 0;
+  2580  045D  1187               	bcf	(59/8),(59)&7
+  2581  045E  2C5F               	goto	l3511
+  2582                           	line	285
+  2583                           	
+  2584  045F                     l999:	
+  2585                           	line	286
+  2586                           	
+  2587  045F                     l3511:	
+  2588                           ;robot test 2 - Ch2 yes servo.c: 285: }
+  2589                           ;robot test 2 - Ch2 yes servo.c: 286: if(PWMCounter > dutyMotorR)
+  2590  045F  1283               	bcf	status, 5	;RP0=0, select bank0
+  2591  0460  1303               	bcf	status, 6	;RP1=0, select bank0
+  2592  0461  084E               	movf	(_dutyMotorR+1),w
+  2593  0462  3A80               	xorlw	80h
+  2594  0463  00F0               	movwf	(??_PWM_check+0)+0
+  2595  0464  0825               	movf	(_PWMCounter+1),w
+  2596  0465  3A80               	xorlw	80h
+  2597  0466  0270               	subwf	(??_PWM_check+0)+0,w
+  2598  0467  1D03               	skipz
+  2599  0468  2C6B               	goto	u2575
+  2600  0469  0824               	movf	(_PWMCounter),w
+  2601  046A  024D               	subwf	(_dutyMotorR),w
+  2602  046B                     u2575:
+  2603                           
+  2604  046B  1803               	skipnc
+  2605  046C  2C6E               	goto	u2571
+  2606  046D  2C6F               	goto	u2570
+  2607  046E                     u2571:
+  2608  046E  2C74               	goto	l1001
+  2609  046F                     u2570:
+  2610                           	line	288
+  2611                           	
+  2612  046F                     l3513:	
+  2613                           ;robot test 2 - Ch2 yes servo.c: 287: {
+  2614                           ;robot test 2 - Ch2 yes servo.c: 288: RC5 = 0;
+  2615  046F  1283               	bcf	status, 5	;RP0=0, select bank0
+  2616  0470  1303               	bcf	status, 6	;RP1=0, select bank0
+  2617  0471  1287               	bcf	(61/8),(61)&7
+  2618                           	line	289
+  2619                           ;robot test 2 - Ch2 yes servo.c: 289: RC4 = 0;
+  2620  0472  1207               	bcf	(60/8),(60)&7
+  2621  0473  2C74               	goto	l1001
+  2622                           	line	290
+  2623                           	
+  2624  0474                     l1000:	
+  2625                           	line	291
+  2626                           	
+  2627  0474                     l1001:	
+  2628  0474  0008               	return
+  2629                           	opt stack 0
+  2630                           GLOBAL	__end_of_PWM_check
+  2631  0475                     	__end_of_PWM_check:
+  2632 ;; =============== function _PWM_check ends ============
+  2633                           
+  2634                           	signat	_PWM_check,88
+  2635                           	global	_PWM_reset
+  2636                           psect	text399,local,class=CODE,delta=2
+  2637                           global __ptext399
+  2638  0475                     __ptext399:
+  2639                           
+  2640 ;; *************** function _PWM_reset *****************
+  2641 ;; Defined at:
+  2642 ;;		line 294 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  2643 ;; Parameters:    Size  Location     Type
+  2644 ;;		None
+  2645 ;; Auto vars:     Size  Location     Type
+  2646 ;;		None
+  2647 ;; Return value:  Size  Location     Type
+  2648 ;;		None               void
+  2649 ;; Registers used:
+  2650 ;;		wreg, status,2
+  2651 ;; Tracked objects:
+  2652 ;;		On entry : 0/0
+  2653 ;;		On exit  : 0/0
+  2654 ;;		Unchanged: 0/0
+  2655 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  2656 ;;      Params:         0       0       0       0
+  2657 ;;      Locals:         0       0       0       0
+  2658 ;;      Temps:          0       0       0       0
+  2659 ;;      Totals:         0       0       0       0
+  2660 ;;Total ram usage:        0 bytes
+  2661 ;; Hardware stack levels used:    1
+  2662 ;; This function calls:
+  2663 ;;		Nothing
+  2664 ;; This function is called by:
+  2665 ;;		_main
+  2666 ;; This function uses a non-reentrant model
+  2667 ;;
+  2668                           psect	text399
+  2669                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  2670                           	line	294
+  2671                           	global	__size_of_PWM_reset
+  2672  0037                     	__size_of_PWM_reset	equ	__end_of_PWM_reset-_PWM_reset
+  2673                           	
+  2674  0475                     _PWM_reset:	
+  2675                           	opt	stack 7
+  2676                           ; Regs used in _PWM_reset: [wreg+status,2]
+  2677                           	line	295
+  2678                           	
+  2679  0475                     l3487:	
+  2680                           ;robot test 2 - Ch2 yes servo.c: 295: RB6 = !RB6;
+  2681  0475  3040               	movlw	1<<((54)&7)
+  2682  0476  1283               	bcf	status, 5	;RP0=0, select bank0
+  2683  0477  1303               	bcf	status, 6	;RP1=0, select bank0
+  2684  0478  0686               	xorwf	((54)/8),f
+  2685                           	line	296
+  2686                           	
+  2687  0479                     l3489:	
+  2688                           ;robot test 2 - Ch2 yes servo.c: 296: PWMCounter = 0;
+  2689  0479  01A4               	clrf	(_PWMCounter)
+  2690  047A  01A5               	clrf	(_PWMCounter+1)
+  2691                           	line	298
+  2692                           	
+  2693  047B                     l3491:	
+  2694                           ;robot test 2 - Ch2 yes servo.c: 298: if(statMotorR == 1)
+  2695  047B  3001               	movlw	01h
+  2696  047C  0651               	xorwf	(_statMotorR),w
+  2697  047D  0452               	iorwf	(_statMotorR+1),w
+  2698  047E  1D03               	skipz
+  2699  047F  2C81               	goto	u2521
+  2700  0480  2C82               	goto	u2520
+  2701  0481                     u2521:
+  2702  0481  2C85               	goto	l3495
+  2703  0482                     u2520:
+  2704                           	line	300
+  2705                           	
+  2706  0482                     l3493:	
+  2707                           ;robot test 2 - Ch2 yes servo.c: 299: {
+  2708                           ;robot test 2 - Ch2 yes servo.c: 300: RC5 = 1;
+  2709  0482  1687               	bsf	(61/8),(61)&7
+  2710                           	line	301
+  2711                           ;robot test 2 - Ch2 yes servo.c: 301: RC4 = 0;
+  2712  0483  1207               	bcf	(60/8),(60)&7
+  2713                           	line	302
+  2714                           ;robot test 2 - Ch2 yes servo.c: 302: }
+  2715  0484  2C93               	goto	l3499
+  2716                           	line	303
+  2717                           	
+  2718  0485                     l1004:	
+  2719                           	
+  2720  0485                     l3495:	
+  2721                           ;robot test 2 - Ch2 yes servo.c: 303: else if(statMotorR == 2)
+  2722  0485  3002               	movlw	02h
+  2723  0486  0651               	xorwf	(_statMotorR),w
+  2724  0487  0452               	iorwf	(_statMotorR+1),w
+  2725  0488  1D03               	skipz
+  2726  0489  2C8B               	goto	u2531
+  2727  048A  2C8C               	goto	u2530
+  2728  048B                     u2531:
+  2729  048B  2C8F               	goto	l1006
+  2730  048C                     u2530:
+  2731                           	line	305
+  2732                           	
+  2733  048C                     l3497:	
+  2734                           ;robot test 2 - Ch2 yes servo.c: 304: {
+  2735                           ;robot test 2 - Ch2 yes servo.c: 305: RC5 = 0;
+  2736  048C  1287               	bcf	(61/8),(61)&7
+  2737                           	line	306
+  2738                           ;robot test 2 - Ch2 yes servo.c: 306: RC4 = 1;
+  2739  048D  1607               	bsf	(60/8),(60)&7
+  2740                           	line	307
+  2741                           ;robot test 2 - Ch2 yes servo.c: 307: }
+  2742  048E  2C93               	goto	l3499
+  2743                           	line	308
+  2744                           	
+  2745  048F                     l1006:	
+  2746                           	line	310
+  2747                           ;robot test 2 - Ch2 yes servo.c: 308: else
+  2748                           ;robot test 2 - Ch2 yes servo.c: 309: {
+  2749                           ;robot test 2 - Ch2 yes servo.c: 310: RC5 = 0;
+  2750  048F  1287               	bcf	(61/8),(61)&7
+  2751                           	line	311
+  2752                           ;robot test 2 - Ch2 yes servo.c: 311: RC4 = 0;
+  2753  0490  1207               	bcf	(60/8),(60)&7
+  2754  0491  2C93               	goto	l3499
+  2755                           	line	312
+  2756                           	
+  2757  0492                     l1007:	
+  2758  0492  2C93               	goto	l3499
+  2759                           	
+  2760  0493                     l1005:	
+  2761                           	line	314
+  2762                           	
+  2763  0493                     l3499:	
+  2764                           ;robot test 2 - Ch2 yes servo.c: 312: }
+  2765                           ;robot test 2 - Ch2 yes servo.c: 314: if(statMotorL == 1)
+  2766  0493  3001               	movlw	01h
+  2767  0494  064F               	xorwf	(_statMotorL),w
+  2768  0495  0450               	iorwf	(_statMotorL+1),w
+  2769  0496  1D03               	skipz
+  2770  0497  2C99               	goto	u2541
+  2771  0498  2C9A               	goto	u2540
+  2772  0499                     u2541:
+  2773  0499  2C9D               	goto	l3503
+  2774  049A                     u2540:
+  2775                           	line	316
+  2776                           	
+  2777  049A                     l3501:	
+  2778                           ;robot test 2 - Ch2 yes servo.c: 315: {
+  2779                           ;robot test 2 - Ch2 yes servo.c: 316: RC6 = 1;
+  2780  049A  1707               	bsf	(62/8),(62)&7
+  2781                           	line	317
+  2782                           ;robot test 2 - Ch2 yes servo.c: 317: RC3 = 0;
+  2783  049B  1187               	bcf	(59/8),(59)&7
+  2784                           	line	318
+  2785                           ;robot test 2 - Ch2 yes servo.c: 318: }
+  2786  049C  2CAB               	goto	l1012
+  2787                           	line	319
+  2788                           	
+  2789  049D                     l1008:	
+  2790                           	
+  2791  049D                     l3503:	
+  2792                           ;robot test 2 - Ch2 yes servo.c: 319: else if(statMotorL == 2)
+  2793  049D  3002               	movlw	02h
+  2794  049E  064F               	xorwf	(_statMotorL),w
+  2795  049F  0450               	iorwf	(_statMotorL+1),w
+  2796  04A0  1D03               	skipz
+  2797  04A1  2CA3               	goto	u2551
+  2798  04A2  2CA4               	goto	u2550
+  2799  04A3                     u2551:
+  2800  04A3  2CA7               	goto	l1010
+  2801  04A4                     u2550:
+  2802                           	line	321
+  2803                           	
+  2804  04A4                     l3505:	
+  2805                           ;robot test 2 - Ch2 yes servo.c: 320: {
+  2806                           ;robot test 2 - Ch2 yes servo.c: 321: RC6 = 0;
+  2807  04A4  1307               	bcf	(62/8),(62)&7
+  2808                           	line	322
+  2809                           ;robot test 2 - Ch2 yes servo.c: 322: RC3 = 1;
+  2810  04A5  1587               	bsf	(59/8),(59)&7
+  2811                           	line	323
+  2812                           ;robot test 2 - Ch2 yes servo.c: 323: }
+  2813  04A6  2CAB               	goto	l1012
+  2814                           	line	324
+  2815                           	
+  2816  04A7                     l1010:	
+  2817                           	line	326
+  2818                           ;robot test 2 - Ch2 yes servo.c: 324: else
+  2819                           ;robot test 2 - Ch2 yes servo.c: 325: {
+  2820                           ;robot test 2 - Ch2 yes servo.c: 326: RC6 = 0;
+  2821  04A7  1307               	bcf	(62/8),(62)&7
+  2822                           	line	327
+  2823                           ;robot test 2 - Ch2 yes servo.c: 327: RC3 = 0;
+  2824  04A8  1187               	bcf	(59/8),(59)&7
+  2825  04A9  2CAB               	goto	l1012
+  2826                           	line	328
+  2827                           	
+  2828  04AA                     l1011:	
+  2829  04AA  2CAB               	goto	l1012
+  2830                           	
+  2831  04AB                     l1009:	
+  2832                           	line	329
+  2833                           	
+  2834  04AB                     l1012:	
+  2835  04AB  0008               	return
+  2836                           	opt stack 0
+  2837                           GLOBAL	__end_of_PWM_reset
+  2838  04AC                     	__end_of_PWM_reset:
+  2839 ;; =============== function _PWM_reset ends ============
+  2840                           
+  2841                           	signat	_PWM_reset,88
+  2842                           	global	_PWM_PID_convert
+  2843                           psect	text400,local,class=CODE,delta=2
+  2844                           global __ptext400
+  2845  0698                     __ptext400:
+  2846                           
+  2847 ;; *************** function _PWM_PID_convert *****************
+  2848 ;; Defined at:
+  2849 ;;		line 236 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  2850 ;; Parameters:    Size  Location     Type
+  2851 ;;		None
+  2852 ;; Auto vars:     Size  Location     Type
+  2853 ;;		None
+  2854 ;; Return value:  Size  Location     Type
+  2855 ;;		None               void
+  2856 ;; Registers used:
+  2857 ;;		wreg, status,2, status,0, btemp+1
+  2858 ;; Tracked objects:
+  2859 ;;		On entry : 0/0
+  2860 ;;		On exit  : 0/0
+  2861 ;;		Unchanged: 0/0
+  2862 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  2863 ;;      Params:         0       0       0       0
+  2864 ;;      Locals:         0       0       0       0
+  2865 ;;      Temps:          2       0       0       0
+  2866 ;;      Totals:         2       0       0       0
+  2867 ;;Total ram usage:        2 bytes
+  2868 ;; Hardware stack levels used:    1
+  2869 ;; This function calls:
+  2870 ;;		Nothing
+  2871 ;; This function is called by:
+  2872 ;;		_main
+  2873 ;; This function uses a non-reentrant model
+  2874 ;;
+  2875                           psect	text400
+  2876                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  2877                           	line	236
+  2878                           	global	__size_of_PWM_PID_convert
+  2879  00A5                     	__size_of_PWM_PID_convert	equ	__end_of_PWM_PID_convert-_PWM_PID_convert
+  2880                           	
+  2881  0698                     _PWM_PID_convert:	
+  2882                           	opt	stack 7
+  2883                           ; Regs used in _PWM_PID_convert: [wreg+status,2+status,0+btemp+1]
+  2884                           	line	237
+  2885                           	
+  2886  0698                     l3451:	
+  2887                           ;robot test 2 - Ch2 yes servo.c: 237: if(totalTurn > 0)
+  2888  0698  1283               	bcf	status, 5	;RP0=0, select bank0
+  2889  0699  1303               	bcf	status, 6	;RP1=0, select bank0
+  2890  069A  083D               	movf	(_totalTurn+1),w
+  2891  069B  3A80               	xorlw	80h
+  2892  069C  00FF               	movwf	btemp+1
+  2893  069D  3080               	movlw	(high(01h))^80h
+  2894  069E  027F               	subwf	btemp+1,w
+  2895  069F  1D03               	skipz
+  2896  06A0  2EA3               	goto	u2485
+  2897  06A1  3001               	movlw	low(01h)
+  2898  06A2  023C               	subwf	(_totalTurn),w
+  2899  06A3                     u2485:
+  2900                           
+  2901  06A3  1C03               	skipc
+  2902  06A4  2EA6               	goto	u2481
+  2903  06A5  2EA7               	goto	u2480
+  2904  06A6                     u2481:
+  2905  06A6  2EED               	goto	l3467
+  2906  06A7                     u2480:
+  2907                           	line	239
+  2908                           	
+  2909  06A7                     l3453:	
+  2910                           ;robot test 2 - Ch2 yes servo.c: 238: {
+  2911                           ;robot test 2 - Ch2 yes servo.c: 239: RC0 = 0;
+  2912  06A7  1283               	bcf	status, 5	;RP0=0, select bank0
+  2913  06A8  1303               	bcf	status, 6	;RP1=0, select bank0
+  2914  06A9  1007               	bcf	(56/8),(56)&7
+  2915                           	line	240
+  2916                           ;robot test 2 - Ch2 yes servo.c: 240: RA2 = 1;
+  2917  06AA  1505               	bsf	(42/8),(42)&7
+  2918                           	line	242
+  2919                           	
+  2920  06AB                     l3455:	
+  2921                           ;robot test 2 - Ch2 yes servo.c: 242: statMotorR = 1;
+  2922  06AB  3001               	movlw	low(01h)
+  2923  06AC  00D1               	movwf	(_statMotorR)
+  2924  06AD  3000               	movlw	high(01h)
+  2925  06AE  00D2               	movwf	((_statMotorR))+1
+  2926                           	line	243
+  2927                           ;robot test 2 - Ch2 yes servo.c: 243: dutyMotorR = 100;
+  2928  06AF  3064               	movlw	low(064h)
+  2929  06B0  00CD               	movwf	(_dutyMotorR)
+  2930  06B1  3000               	movlw	high(064h)
+  2931  06B2  00CE               	movwf	((_dutyMotorR))+1
+  2932                           	line	244
+  2933                           	
+  2934  06B3                     l3457:	
+  2935                           ;robot test 2 - Ch2 yes servo.c: 244: if(totalTurn > 100)
+  2936  06B3  083D               	movf	(_totalTurn+1),w
+  2937  06B4  3A80               	xorlw	80h
+  2938  06B5  00FF               	movwf	btemp+1
+  2939  06B6  3080               	movlw	(high(065h))^80h
+  2940  06B7  027F               	subwf	btemp+1,w
+  2941  06B8  1D03               	skipz
+  2942  06B9  2EBC               	goto	u2495
+  2943  06BA  3065               	movlw	low(065h)
+  2944  06BB  023C               	subwf	(_totalTurn),w
+  2945  06BC                     u2495:
+  2946                           
+  2947  06BC  1C03               	skipc
+  2948  06BD  2EBF               	goto	u2491
+  2949  06BE  2EC0               	goto	u2490
+  2950  06BF                     u2491:
+  2951  06BF  2ED6               	goto	l3463
+  2952  06C0                     u2490:
+  2953                           	line	246
+  2954                           	
+  2955  06C0                     l3459:	
+  2956                           ;robot test 2 - Ch2 yes servo.c: 245: {
+  2957                           ;robot test 2 - Ch2 yes servo.c: 246: statMotorL = 2;
+  2958  06C0  3002               	movlw	low(02h)
+  2959  06C1  1283               	bcf	status, 5	;RP0=0, select bank0
+  2960  06C2  1303               	bcf	status, 6	;RP1=0, select bank0
+  2961  06C3  00CF               	movwf	(_statMotorL)
+  2962  06C4  3000               	movlw	high(02h)
+  2963  06C5  00D0               	movwf	((_statMotorL))+1
+  2964                           	line	247
+  2965                           	
+  2966  06C6                     l3461:	
+  2967                           ;robot test 2 - Ch2 yes servo.c: 247: dutyMotorL = 100 - totalTurn;
+  2968  06C6  093C               	comf	(_totalTurn),w
+  2969  06C7  00F0               	movwf	(??_PWM_PID_convert+0)+0
+  2970  06C8  093D               	comf	(_totalTurn+1),w
+  2971  06C9  00F1               	movwf	((??_PWM_PID_convert+0)+0+1)
+  2972  06CA  0AF0               	incf	(??_PWM_PID_convert+0)+0,f
+  2973  06CB  1903               	skipnz
+  2974  06CC  0AF1               	incf	((??_PWM_PID_convert+0)+0+1),f
+  2975  06CD  0870               	movf	0+(??_PWM_PID_convert+0)+0,w
+  2976  06CE  3E64               	addlw	low(064h)
+  2977  06CF  00CB               	movwf	(_dutyMotorL)
+  2978  06D0  0871               	movf	1+(??_PWM_PID_convert+0)+0,w
+  2979  06D1  1803               	skipnc
+  2980  06D2  3E01               	addlw	1
+  2981  06D3  3E00               	addlw	high(064h)
+  2982  06D4  00CC               	movwf	1+(_dutyMotorL)
+  2983                           	line	248
+  2984                           ;robot test 2 - Ch2 yes servo.c: 248: }
+  2985  06D5  2EED               	goto	l3467
+  2986                           	line	249
+  2987                           	
+  2988  06D6                     l991:	
+  2989                           	line	251
+  2990                           	
+  2991  06D6                     l3463:	
+  2992                           ;robot test 2 - Ch2 yes servo.c: 249: else
+  2993                           ;robot test 2 - Ch2 yes servo.c: 250: {
+  2994                           ;robot test 2 - Ch2 yes servo.c: 251: statMotorL = 1;
+  2995  06D6  3001               	movlw	low(01h)
+  2996  06D7  1283               	bcf	status, 5	;RP0=0, select bank0
+  2997  06D8  1303               	bcf	status, 6	;RP1=0, select bank0
+  2998  06D9  00CF               	movwf	(_statMotorL)
+  2999  06DA  3000               	movlw	high(01h)
+  3000  06DB  00D0               	movwf	((_statMotorL))+1
+  3001                           	line	252
+  3002                           	
+  3003  06DC                     l3465:	
+  3004                           ;robot test 2 - Ch2 yes servo.c: 252: dutyMotorL = 100 - totalTurn;
+  3005  06DC  093C               	comf	(_totalTurn),w
+  3006  06DD  00F0               	movwf	(??_PWM_PID_convert+0)+0
+  3007  06DE  093D               	comf	(_totalTurn+1),w
+  3008  06DF  00F1               	movwf	((??_PWM_PID_convert+0)+0+1)
+  3009  06E0  0AF0               	incf	(??_PWM_PID_convert+0)+0,f
+  3010  06E1  1903               	skipnz
+  3011  06E2  0AF1               	incf	((??_PWM_PID_convert+0)+0+1),f
+  3012  06E3  0870               	movf	0+(??_PWM_PID_convert+0)+0,w
+  3013  06E4  3E64               	addlw	low(064h)
+  3014  06E5  00CB               	movwf	(_dutyMotorL)
+  3015  06E6  0871               	movf	1+(??_PWM_PID_convert+0)+0,w
+  3016  06E7  1803               	skipnc
+  3017  06E8  3E01               	addlw	1
+  3018  06E9  3E00               	addlw	high(064h)
+  3019  06EA  00CC               	movwf	1+(_dutyMotorL)
+  3020  06EB  2EED               	goto	l3467
+  3021                           	line	253
+  3022                           	
+  3023  06EC                     l992:	
+  3024  06EC  2EED               	goto	l3467
+  3025                           	line	254
+  3026                           	
+  3027  06ED                     l990:	
+  3028                           	line	255
+  3029                           	
+  3030  06ED                     l3467:	
+  3031                           ;robot test 2 - Ch2 yes servo.c: 253: }
+  3032                           ;robot test 2 - Ch2 yes servo.c: 254: }
+  3033                           ;robot test 2 - Ch2 yes servo.c: 255: if(totalTurn < 0)
+  3034  06ED  1283               	bcf	status, 5	;RP0=0, select bank0
+  3035  06EE  1303               	bcf	status, 6	;RP1=0, select bank0
+  3036  06EF  1FBD               	btfss	(_totalTurn+1),7
+  3037  06F0  2EF2               	goto	u2501
+  3038  06F1  2EF3               	goto	u2500
+  3039  06F2                     u2501:
+  3040  06F2  2F3C               	goto	l996
+  3041  06F3                     u2500:
+  3042                           	line	258
+  3043                           	
+  3044  06F3                     l3469:	
+  3045                           ;robot test 2 - Ch2 yes servo.c: 256: {
+  3046                           ;robot test 2 - Ch2 yes servo.c: 258: RC0 = 1;
+  3047  06F3  1407               	bsf	(56/8),(56)&7
+  3048                           	line	259
+  3049                           ;robot test 2 - Ch2 yes servo.c: 259: RA2 = 0;
+  3050  06F4  1105               	bcf	(42/8),(42)&7
+  3051                           	line	261
+  3052                           	
+  3053  06F5                     l3471:	
+  3054                           ;robot test 2 - Ch2 yes servo.c: 261: totalTurn = totalTurn * -1;
+  3055  06F5  09BC               	comf	(_totalTurn),f
+  3056  06F6  09BD               	comf	(_totalTurn+1),f
+  3057  06F7  0ABC               	incf	(_totalTurn),f
+  3058  06F8  1903               	skipnz
+  3059  06F9  0ABD               	incf	(_totalTurn+1),f
+  3060                           	line	262
+  3061                           	
+  3062  06FA                     l3473:	
+  3063                           ;robot test 2 - Ch2 yes servo.c: 262: statMotorL = 1;
+  3064  06FA  3001               	movlw	low(01h)
+  3065  06FB  00CF               	movwf	(_statMotorL)
+  3066  06FC  3000               	movlw	high(01h)
+  3067  06FD  00D0               	movwf	((_statMotorL))+1
+  3068                           	line	263
+  3069                           	
+  3070  06FE                     l3475:	
+  3071                           ;robot test 2 - Ch2 yes servo.c: 263: dutyMotorL = 100;
+  3072  06FE  3064               	movlw	low(064h)
+  3073  06FF  00CB               	movwf	(_dutyMotorL)
+  3074  0700  3000               	movlw	high(064h)
+  3075  0701  00CC               	movwf	((_dutyMotorL))+1
+  3076                           	line	265
+  3077                           	
+  3078  0702                     l3477:	
+  3079                           ;robot test 2 - Ch2 yes servo.c: 265: if(totalTurn > 100)
+  3080  0702  083D               	movf	(_totalTurn+1),w
+  3081  0703  3A80               	xorlw	80h
+  3082  0704  00FF               	movwf	btemp+1
+  3083  0705  3080               	movlw	(high(065h))^80h
+  3084  0706  027F               	subwf	btemp+1,w
+  3085  0707  1D03               	skipz
+  3086  0708  2F0B               	goto	u2515
+  3087  0709  3065               	movlw	low(065h)
+  3088  070A  023C               	subwf	(_totalTurn),w
+  3089  070B                     u2515:
+  3090                           
+  3091  070B  1C03               	skipc
+  3092  070C  2F0E               	goto	u2511
+  3093  070D  2F0F               	goto	u2510
+  3094  070E                     u2511:
+  3095  070E  2F25               	goto	l3483
+  3096  070F                     u2510:
+  3097                           	line	267
+  3098                           	
+  3099  070F                     l3479:	
+  3100                           ;robot test 2 - Ch2 yes servo.c: 266: {
+  3101                           ;robot test 2 - Ch2 yes servo.c: 267: statMotorR = 2;
+  3102  070F  3002               	movlw	low(02h)
+  3103  0710  1283               	bcf	status, 5	;RP0=0, select bank0
+  3104  0711  1303               	bcf	status, 6	;RP1=0, select bank0
+  3105  0712  00D1               	movwf	(_statMotorR)
+  3106  0713  3000               	movlw	high(02h)
+  3107  0714  00D2               	movwf	((_statMotorR))+1
+  3108                           	line	268
+  3109                           	
+  3110  0715                     l3481:	
+  3111                           ;robot test 2 - Ch2 yes servo.c: 268: dutyMotorR = 100 - totalTurn;
+  3112  0715  093C               	comf	(_totalTurn),w
+  3113  0716  00F0               	movwf	(??_PWM_PID_convert+0)+0
+  3114  0717  093D               	comf	(_totalTurn+1),w
+  3115  0718  00F1               	movwf	((??_PWM_PID_convert+0)+0+1)
+  3116  0719  0AF0               	incf	(??_PWM_PID_convert+0)+0,f
+  3117  071A  1903               	skipnz
+  3118  071B  0AF1               	incf	((??_PWM_PID_convert+0)+0+1),f
+  3119  071C  0870               	movf	0+(??_PWM_PID_convert+0)+0,w
+  3120  071D  3E64               	addlw	low(064h)
+  3121  071E  00CD               	movwf	(_dutyMotorR)
+  3122  071F  0871               	movf	1+(??_PWM_PID_convert+0)+0,w
+  3123  0720  1803               	skipnc
+  3124  0721  3E01               	addlw	1
+  3125  0722  3E00               	addlw	high(064h)
+  3126  0723  00CE               	movwf	1+(_dutyMotorR)
+  3127                           	line	269
+  3128                           ;robot test 2 - Ch2 yes servo.c: 269: }
+  3129  0724  2F3C               	goto	l996
+  3130                           	line	270
+  3131                           	
+  3132  0725                     l994:	
+  3133                           	line	272
+  3134                           	
+  3135  0725                     l3483:	
+  3136                           ;robot test 2 - Ch2 yes servo.c: 270: else
+  3137                           ;robot test 2 - Ch2 yes servo.c: 271: {
+  3138                           ;robot test 2 - Ch2 yes servo.c: 272: statMotorR = 1;
+  3139  0725  3001               	movlw	low(01h)
+  3140  0726  1283               	bcf	status, 5	;RP0=0, select bank0
+  3141  0727  1303               	bcf	status, 6	;RP1=0, select bank0
+  3142  0728  00D1               	movwf	(_statMotorR)
+  3143  0729  3000               	movlw	high(01h)
+  3144  072A  00D2               	movwf	((_statMotorR))+1
+  3145                           	line	273
+  3146                           	
+  3147  072B                     l3485:	
+  3148                           ;robot test 2 - Ch2 yes servo.c: 273: dutyMotorR = 100 - totalTurn;
+  3149  072B  093C               	comf	(_totalTurn),w
+  3150  072C  00F0               	movwf	(??_PWM_PID_convert+0)+0
+  3151  072D  093D               	comf	(_totalTurn+1),w
+  3152  072E  00F1               	movwf	((??_PWM_PID_convert+0)+0+1)
+  3153  072F  0AF0               	incf	(??_PWM_PID_convert+0)+0,f
+  3154  0730  1903               	skipnz
+  3155  0731  0AF1               	incf	((??_PWM_PID_convert+0)+0+1),f
+  3156  0732  0870               	movf	0+(??_PWM_PID_convert+0)+0,w
+  3157  0733  3E64               	addlw	low(064h)
+  3158  0734  00CD               	movwf	(_dutyMotorR)
+  3159  0735  0871               	movf	1+(??_PWM_PID_convert+0)+0,w
+  3160  0736  1803               	skipnc
+  3161  0737  3E01               	addlw	1
+  3162  0738  3E00               	addlw	high(064h)
+  3163  0739  00CE               	movwf	1+(_dutyMotorR)
+  3164  073A  2F3C               	goto	l996
+  3165                           	line	274
+  3166                           	
+  3167  073B                     l995:	
+  3168  073B  2F3C               	goto	l996
+  3169                           	line	275
+  3170                           	
+  3171  073C                     l993:	
+  3172                           	line	276
+  3173                           	
+  3174  073C                     l996:	
+  3175  073C  0008               	return
+  3176                           	opt stack 0
+  3177                           GLOBAL	__end_of_PWM_PID_convert
+  3178  073D                     	__end_of_PWM_PID_convert:
+  3179 ;; =============== function _PWM_PID_convert ends ============
+  3180                           
+  3181                           	signat	_PWM_PID_convert,88
+  3182                           	global	_init_hardware
+  3183                           psect	text401,local,class=CODE,delta=2
+  3184                           global __ptext401
+  3185  03D9                     __ptext401:
+  3186                           
+  3187 ;; *************** function _init_hardware *****************
+  3188 ;; Defined at:
+  3189 ;;		line 387 in file "C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  3190 ;; Parameters:    Size  Location     Type
+  3191 ;;		None
+  3192 ;; Auto vars:     Size  Location     Type
+  3193 ;;		None
+  3194 ;; Return value:  Size  Location     Type
+  3195 ;;		None               void
+  3196 ;; Registers used:
+  3197 ;;		wreg, status,2
+  3198 ;; Tracked objects:
+  3199 ;;		On entry : 0/0
+  3200 ;;		On exit  : 0/0
+  3201 ;;		Unchanged: 0/0
+  3202 ;; Data sizes:     COMMON   BANK0   BANK1   BANK2
+  3203 ;;      Params:         0       0       0       0
+  3204 ;;      Locals:         0       0       0       0
+  3205 ;;      Temps:          0       0       0       0
+  3206 ;;      Totals:         0       0       0       0
+  3207 ;;Total ram usage:        0 bytes
+  3208 ;; Hardware stack levels used:    1
+  3209 ;; This function calls:
+  3210 ;;		Nothing
+  3211 ;; This function is called by:
+  3212 ;;		_main
+  3213 ;; This function uses a non-reentrant model
+  3214 ;;
+  3215                           psect	text401
+  3216                           	file	"C:\Users\User\Documents\Jonathan\J Panu\robot test 2 - Ch2 yes servo.c"
+  3217                           	line	387
+  3218                           	global	__size_of_init_hardware
+  3219  001D                     	__size_of_init_hardware	equ	__end_of_init_hardware-_init_hardware
+  3220                           	
+  3221  03D9                     _init_hardware:	
+  3222                           	opt	stack 7
+  3223                           ; Regs used in _init_hardware: [wreg+status,2]
+  3224                           	line	389
+  3225                           	
+  3226  03D9                     l3429:	
+  3227                           ;robot test 2 - Ch2 yes servo.c: 389: ANSEL = 0b00000000;
+  3228  03D9  1283               	bcf	status, 5	;RP0=0, select bank2
+  3229  03DA  1703               	bsf	status, 6	;RP1=1, select bank2
+  3230  03DB  019E               	clrf	(286)^0100h	;volatile
+  3231                           	line	392
+  3232                           	
+  3233  03DC                     l3431:	
+  3234                           ;robot test 2 - Ch2 yes servo.c: 392: ANSELH = 0b00001100;
+  3235  03DC  300C               	movlw	(0Ch)
+  3236  03DD  009F               	movwf	(287)^0100h	;volatile
+  3237                           	line	395
+  3238                           	
+  3239  03DE                     l3433:	
+  3240                           ;robot test 2 - Ch2 yes servo.c: 395: TRISA = 0b00000000;
+  3241  03DE  1683               	bsf	status, 5	;RP0=1, select bank1
+  3242  03DF  1303               	bcf	status, 6	;RP1=0, select bank1
+  3243  03E0  0185               	clrf	(133)^080h	;volatile
+  3244                           	line	397
+  3245                           ;robot test 2 - Ch2 yes servo.c: 397: TRISB = 0b00110000;
+  3246  03E1  3030               	movlw	(030h)
+  3247  03E2  0086               	movwf	(134)^080h	;volatile
+  3248                           	line	398
+  3249                           ;robot test 2 - Ch2 yes servo.c: 398: TRISC = 0b10000000;
+  3250  03E3  3080               	movlw	(080h)
+  3251  03E4  0087               	movwf	(135)^080h	;volatile
+  3252                           	line	401
+  3253                           	
+  3254  03E5                     l3435:	
+  3255                           ;robot test 2 - Ch2 yes servo.c: 401: PORTA = 0b00000000;
+  3256  03E5  1283               	bcf	status, 5	;RP0=0, select bank0
+  3257  03E6  1303               	bcf	status, 6	;RP1=0, select bank0
+  3258  03E7  0185               	clrf	(5)	;volatile
+  3259                           	line	403
+  3260                           	
+  3261  03E8                     l3437:	
+  3262                           ;robot test 2 - Ch2 yes servo.c: 403: PORTB = 0b00000000;
+  3263  03E8  0186               	clrf	(6)	;volatile
+  3264                           	line	404
+  3265                           	
+  3266  03E9                     l3439:	
+  3267                           ;robot test 2 - Ch2 yes servo.c: 404: PORTC = 0b00000000;
+  3268  03E9  0187               	clrf	(7)	;volatile
+  3269                           	line	407
+  3270                           	
+  3271  03EA                     l3441:	
+  3272                           ;robot test 2 - Ch2 yes servo.c: 407: ADCON0 = 0b00000001;
+  3273  03EA  3001               	movlw	(01h)
+  3274  03EB  009F               	movwf	(31)	;volatile
+  3275                           	line	408
+  3276                           	
+  3277  03EC                     l3443:	
+  3278                           ;robot test 2 - Ch2 yes servo.c: 408: ANSELH = 0b00001100;
+  3279  03EC  300C               	movlw	(0Ch)
+  3280  03ED  1283               	bcf	status, 5	;RP0=0, select bank2
+  3281  03EE  1703               	bsf	status, 6	;RP1=1, select bank2
+  3282  03EF  009F               	movwf	(287)^0100h	;volatile
+  3283                           	line	411
+  3284                           	
+  3285  03F0                     l3445:	
+  3286                           ;robot test 2 - Ch2 yes servo.c: 411: IRCF0 = 1;
+  3287  03F0  1683               	bsf	status, 5	;RP0=1, select bank1
+  3288  03F1  1303               	bcf	status, 6	;RP1=0, select bank1
+  3289  03F2  160F               	bsf	(1148/8)^080h,(1148)&7
+  3290                           	line	412
+  3291                           	
+  3292  03F3                     l3447:	
+  3293                           ;robot test 2 - Ch2 yes servo.c: 412: IRCF1 = 1;
+  3294  03F3  168F               	bsf	(1149/8)^080h,(1149)&7
+  3295                           	line	413
+  3296                           	
+  3297  03F4                     l3449:	
+  3298                           ;robot test 2 - Ch2 yes servo.c: 413: IRCF2 = 1;
+  3299  03F4  170F               	bsf	(1150/8)^080h,(1150)&7
+  3300                           	line	414
+  3301                           	
+  3302  03F5                     l1036:	
+  3303  03F5  0008               	return
+  3304                           	opt stack 0
+  3305                           GLOBAL	__end_of_init_hardware
+  3306  03F6                     	__end_of_init_hardware:
+  3307 ;; =============== function _init_hardware ends ============
+  3308                           
+  3309                           	signat	_init_hardware,88
+  3310                           psect	text402,local,class=CODE,delta=2
+  3311                           global __ptext402
+  3312  0000                     __ptext402:
+  3313                           	global	btemp
+  3314  007E                     	btemp set 07Eh
+  3315                           
+  3316                           	DABS	1,126,2	;btemp
+  3317                           	global	wtemp0
+  3318  007E                     	wtemp0 set btemp
+
+
+HI-TECH Software PICC Macro Assembler V9.83 build 10920 
+Symbol Table                                                                                   Mon May 27 16:07:16 2013
+
+                    _PWMCounter 0024                               _i 002C                              _RD 0C60  
+                            _WR 0C61                    ___awdiv@sign 003F                              fsr 0004  
+           ___wmul@multiplicand 0072                 _PWM_PID_convert 0698                             l951 054B  
+                           l952 054B                             l953 054F                             l962 04F8  
+                           l954 057E                             l963 04F8                             l971 07FA  
+                           l955 0555                             l964 04FD                             l972 07F9  
+                           l956 056B                             l965 050D                             l981 07D1  
+                           l973 0788                             l957 057A                             l990 06ED  
+                           l966 050D                             l974 07F0                             l982 07EE  
+                           l958 0588                             l991 06D6                             l967 0512  
+                           l983 07FF                             l975 07B9                             l959 059E  
+                           l992 06EC                             l968 0543                             l984 07FF  
+                           l993 073C                             l977 07A0                             l994 0725  
+                           l978 07EF                             l995 073B                             l987 0697  
+                           l979 07EA                             _GIE 005F                             l996 073C  
+                           l999 045F                             _RA2 002A                             _RC0 0038  
+                           _RC2 003A                             _RC3 003B                             _RC4 003C  
+                           _RB6 0036                             _RC5 003D                             _RC6 003E  
+                           _RC7 003F                             indf 0000                            l1000 0474  
+                          l1001 0474                            l1010 04A7                            l1011 04AA  
+                          l1012 04AB                            l1004 0485                            l1005 0493  
+                          l1021 03D8                            l1006 048F                            l1030 03B5  
+                          l1007 0492                            l1015 03AE                            l1008 049D  
+                          l1024 04E1                            l1009 04AB                            l1025 04D6  
+                          l1018 03AA                            l1026 04F1                            l1027 04F1  
+                          l1036 03F5                            l2040 05DB                            l2041 05DC  
+                          l2042 05F5                            l2043 0603                            l2035 05B0  
+                          l2044 060E                            l2036 05BE                            l2045 0615  
+                          l2037 0604                            l2038 05D6                            l2039 05CA  
+                          l3501 049A                            l3431 03DC                            l3503 049D  
+                          l3511 045F                            l3441 03EA                            l3433 03DE  
+                          l3505 04A4                            l3513 046F                            l3521 03F6  
+                          l3601 0672                            l3443 03EC                            l3435 03E5  
+                          l3451 0698                            l3507 044A                            l3515 03AF  
+                          l3531 041F                            l3523 03F9                            l3603 0682  
+                          l3611 04B2                            l3445 03F0                            l3437 03E8  
+                          l3429 03D9                            l3461 06C6                            l3453 06A7  
+                          l3509 045A                            l3517 03A7                            l3525 03FD  
+                          l3541 05B9                            l3533 05A0                            l3605 03C6  
+                          l3621 04D2                            l3613 04BF                            l3701 058B  
+                          l3447 03F3                            l3439 03E9                            l3471 06F5  
+                          l3463 06D6                            l3455 06AB                            l3519 03AB  
+                          l3527 040A                            l3551 05D1                            l3543 05BE  
+                          l3535 05A7                            l3607 03CC                            l3623 04D6  
+                          l3615 04C2                            l3631 074C                            l3703 058F  
+                          l3449 03F4                            l3481 0715                            l3473 06FA  
+                          l3465 06DC                            l3457 06B3                            l3529 0418  
+                          l3561 05F5                            l3553 05D6                            l3545 05C0  
+                          l3537 05B0                            l3625 04D9                            l3617 04C3  
+                          l3609 04AC                            l3641 077A                            l3633 075B  
+                          l3705 0591                            l3483 0725                            l3475 06FE  
+                          l3459 06C0                            l3467 06ED                            l3491 047B  
+                          l3571 0615                            l3563 05FC                            l3555 05DC  
+                          l3547 05C6                            l3539 05B4                            l3627 04E1  
+                          l3619 04C4                            l3651 0798                            l3643 0781  
+                          l3635 0763                            l3485 072B                            l3477 0702  
+                          l3469 06F3                            l3493 0482                            l3557 05ED  
+                          l3549 05CA                            l3565 0604                            l3581 050B  
+                          l3573 04F2                            l3661 07C2                            l3653 07A0  
+                          l3645 0784                            l3637 0770                            l3629 073D  
+                          l3479 070F                            l3495 0485                            l3487 0475  
+                          l1895 03F9                            l3567 0608                            l3559 05F3  
+                          l3583 0512                            l3575 04F6                            l3591 0636  
+                          l3671 07EA                            l3663 07C9                            l3655 07A6  
+                          l3647 0788                            l3639 0774                            l1896 0403  
+                          l3497 048C                            l3489 0479                            l1897 0418  
+                          l3569 060E                            l3585 0519                            l3577 04FD  
+                          l3593 064B                            l3665 07D1                            l3657 07B5  
+                          l3649 0791                            l3673 07F0                            l3681 0544  
+                          l1898 041F                            l3499 0493                            l3587 053B  
+                          l3579 0504                            l3595 0651                            l3675 07F4  
+                          l3667 07D7                            l3659 07B9                            l3691 056B  
+                          l3683 0547                            l3597 0657                            l3589 0616  
+                          l3677 07F6                            l3669 07E6                            l3693 0571  
+                          l3685 0550                            l3599 065D                            l3679 07FA  
+                          l3695 0574                            l3687 0555                            l3689 0562  
+                          l3697 057E                            l3699 0588                            u2500 06F3  
+                          u2501 06F2                            u2510 070F                            u2511 070E  
+                          u2520 0482                            u2521 0481                            u2530 048C  
+                          u2610 0417                            u2515 070B                            u2531 048B  
+                          u2611 0416                            u2540 049A                            u2700 0602  
+                          u2620 05A7                            u2541 0499                            u2605 040B  
+                          u2701 0601                            u2621 05A6                            u2550 04A4  
+                          u2710 0608                            u2630 05B4                            u2551 04A3  
+                          u2631 05B3                            u2480 06A7                            u2560 045A  
+                          u2640 05C6                            u2720 04FC                            u2800 0798  
+                          u2481 06A6                            u2561 0459                            u2641 05C5  
+                          u2721 04FB                            u2801 0797                            u2490 06C0  
+                          u2570 046F                            u2730 0511                            u2810 079F  
+                          u2491 06BF                            u2571 046E                            u2731 0510  
+                          u2811 079E                            u2580 03FD                            u2660 05DA  
+                          u2740 04F0                            u2820 07C2                            u2485 06A3  
+                          u2565 0456                            u2581 03FC                            u2661 05D9  
+                          u2741 04EF                            u2821 07C1                            u2830 07C9  
+                          u2750 074C                            u2495 06BC                            u2575 046B  
+                          u2655 05CB                            u2831 07C8                            u2751 074B  
+                          u2680 05ED                            u2840 07D0                            u2760 075B  
+                          u2681 05EC                            u2745 04EC                            u2841 07CF  
+                          u2761 075A                            u2770 0770                            u2850 054F  
+                          u2595 0404                            u2675 05DD                            u2907 07DF  
+                          u2771 076F                            u2755 0748                            u2851 054E  
+                          u2780 0781                            u2860 0562                            u2685 05E9  
+                          u2917 04B8                            u2781 0780                            u2765 0757  
+                          u2861 0561                            u2790 0791                            u2870 0587  
+                          u2695 05F6                            u2927 04CB                            u2791 0790  
+                          u2775 076C                            u2871 0586                            u2937 04DD  
+                          u2865 055E                            u2947 03D2                            u2887 0597  
+                          u2897 07AE                            _WREN 0C62                            _main 0544  
+                          btemp 007E                            start 0000               _black_black_check 073D  
+            ?_black_black_check 0070            __size_of_ADC_convert 0052             ??_black_black_check 0045  
+                         ?_main 0070                 __end_of___awdiv 0616                           _EEADR 010D  
+                         _CARRY 0018                           _ANSEL 011E                 ___awdiv@divisor 0076  
+                         _IRCF0 047C                           _IRCF1 047D                           _IRCF2 047E  
+               ___awdiv@counter 003E                           _PORTA 0005                           _PORTB 0006  
+                         _PORTC 0007                           _TRISA 0085                           _TRISB 0086  
+                         _TRISC 0087         ??_move_forwards_aLittle 0070                           _error 003A  
+     __end_of_black_black_check 0800                           status 0003                           wtemp0 007E  
+            __size_of_PWM_check 002B              __size_of_PWM_reset 0037                    __end_of_main 05A0  
+       __end_of_PWM_PID_convert 073D               _blackBlackCounter 0028                          ??_main 0048  
+                        _ADCON0 001F                          _ADRESH 001E                          _EEDATA 010C  
+                        _EECON1 018C                          _EECON2 018D                ___awdiv@dividend 0078  
+                        _ANSELH 011F                          _D_turn 0020                          _I_turn 0022  
+                _PID_controller 0616                          _P_turn 0026          __size_of_init_hardware 001D  
+                        ___wmul 03F6                       ??___awdiv 007A                ___awdiv@quotient 0040  
+              __end_of_move_180 04F2                          clrloop 03B7                __end_of_servo_on 03AF  
+             __end_of_PWM_check 0475               __end_of_PWM_reset 04AC      __size_of_black_black_check 00C3  
+               _derivativeError 0038          __end_of_PID_controller 0698                  __pcstackCOMMON 0070  
+                  __pidataBANK0 03BE                ?_PWM_PID_convert 0070                   _init_hardware 03D9  
+                    __pbssBANK0 0020                 ?_PID_controller 0070                      __pmaintext 0544  
+                       ?___wmul 0070              __size_of_move_stop 0007                  ?_init_hardware 0070  
+            __size_of_servo_off 0004  __size_of_move_forwards_aLittle 0013   __end_of_move_forwards_aLittle 03D9  
+                     ?_move_180 0070                   ??_ADC_convert 007B                   _integralError 002E  
+                     ?_servo_on 0070                         ___awdiv 05A0                 __size_of___wmul 002A  
+                    _dutyMotorL 004B                      _dutyMotorR 004D            end_of_initialization 0447  
+             __end_of_move_stop 03B6                      ??_move_180 0042               __end_of_servo_off 03AB  
+                    ??_servo_on 0070             __end_of_ADC_convert 0544                 ??_init_hardware 0070  
+                    _statMotorL 004F                      _statMotorR 0051                   _changeCounter 002A  
+                     _PWM_check 044A                       _PWM_reset 0475                  __end_of___wmul 0420  
+           start_initialization 0420                ??_PID_controller 007B                      ?_PWM_check 0070  
+                    ?_PWM_reset 0070                     _ADC_convert 04F2                        ??___wmul 0074  
+                   __pdataBANK0 004B        __size_of_PWM_PID_convert 00A5                   __pcstackBANK0 003E  
+             __size_of_move_180 0046                        ?___awdiv 0076                       __ptext400 0698  
+                     __ptext401 03D9                       __ptext402 0000                       __ptext390 03C6  
+                     __ptext391 0616                       __ptext392 04F2                       __ptext393 05A0  
+                     __ptext394 03F6                       __ptext395 03AB                       __ptext396 03A7  
+                     __ptext388 073D                       __ptext397 03AF                       __ptext389 04AC  
+                     __ptext398 044A                       __ptext399 0475               __size_of_servo_on 0004  
+                     _readSensL 0034                       _readSensR 0036                     ??_PWM_check 0070  
+         _move_forwards_aLittle 03C6                       _pastError 0032                     ??_PWM_reset 0070  
+                ___wmul@product 0074                       _move_stop 03AF                        _GO_nDONE 00F9  
+                     _servo_off 03A7               ___wmul@multiplier 0070                       _totalTurn 003C  
+             ??_PWM_PID_convert 0070                      ?_move_stop 0070                      ?_servo_off 0070  
+              __size_of___awdiv 0076           __end_of_init_hardware 03F6          ?_move_forwards_aLittle 0070  
+                 __size_of_main 005C                        _move_180 04AC                        _loopExit 0030  
+                      clear_ram 03B6                    ?_ADC_convert 0070                        _servo_on 03AB  
+                   ??_move_stop 0070                     ??_servo_off 0070         __size_of_PID_controller 0082  

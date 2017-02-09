@@ -1,0 +1,1130 @@
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;**********************************************************************
+                      00002 ;                                                                                                       
+                                                                    *
+                      00003 ;       Filename:               AAA Tilt Mouse Release1,2.asm                                           
+                            *
+                      00004 ;       Date:                                                                                           
+                                                            *
+                      00005 ;       File Version:   1.2.0                                                                           
+                                            *
+                      00006 ;                                                                                                       
+                                                                    *
+                      00007 ;       Author:                 Jonathan                                                                
+                                                    *
+                      00008 ;       Company:                                                                                        
+                                                            *
+                      00009 ;                                                                                                       
+                                                                    * 
+                      00010 ;                                                                                                       
+                                                                    *
+                      00011 ;**********************************************************************
+                      00012 ;                                                                                                       
+                                                                    *
+                      00013 ;       Files Required: P16F690.INC                                                                     
+                                            *
+                      00014 ;                                                                                                       
+                                                                    *
+                      00015 ;**********************************************************************
+                      00016 ;                                                                                                       
+                                                                    *
+                      00017 ;       Notes:                                                                                          
+                                                            *
+                      00018 ;               button stat:    hardware, 0=pressed                                                     
+                                    *
+                      00019 ;                                               software vars, 1=unpressed                              
+                                            *
+                      00020 ;                                                                                                       
+                                                                    *
+                      00021 ;**********************************************************************
+                      00022 ;                                                                                                       
+                                                                    *
+                      00023 ;       Microsoft Serial Mouse Protocol:                                                                
+                                    *
+                      00024 ;               Data in 3-byte packets                                                                  
+                                            *
+                      00025 ;                                                                                                       
+                                                                    *
+                      00026 ;               Bit:            7       6       5       4       3       2       1       0               
+                                                            *
+                      00027 ;               Byte0:          1       1       LB      RB      Y7      Y6      X7      X6              
+                                                            *
+                      00028 ;               Byte1:          1       0       X5      X4      X3      X2      X1      X0              
+                                                            *
+                      00029 ;               Byte2:          1       0       Y5      Y4      Y3      Y2      Y1      Y0              
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                                                            *
+                      00030 ;                                                                                                       
+                                                                    *
+                      00031 ;                                                                                                       
+                                                                    *
+                      00032 ;               Initialized by sending ASCII 'M' when RTS toggled                               *
+                      00033 ;**********************************************************************
+                      00034 
+                      00035 
+                      00036         list            p=16f690                ; list directive to define processor
+                      00037         #include <p16F690.inc>
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ;  MPASM PIC16F690 processor include
+                      00005 ; 
+                      00006 ;  (c) Copyright 1999-2013 Microchip Technology, All rights reserved
+                      00007 ;==========================================================================
+                      00008 
+                      00756         LIST
+                      00038         
+                      00039         #define         iTiltX          PORTA,1         ;pin names
+                      00040         #define         iTiltY          PORTA,0
+                      00041         #define         iRightB         PORTA,4
+                      00042         #define         iLeftB          PORTA,3
+                      00043         #define         iRightP         PORTC,1
+                      00044         #define         iLeftP          PORTC,0
+                      00045         #define         iSensTog        PORTA,5
+                      00046         #define         RTS                     PORTB,4
+                      00047         
+                      00048         #define         nOffset         .83
+                      00049         #define         nUpperBound     .86
+                      00050         #define         nLowerBound     .80
+                      00051         #define         nShiftCtrl      .250
+                      00052         
+                      00053         #define         sOffset         .16                     ;previously .22
+                      00054         #define         sUpperBound     .16                     ;                       .24
+                      00055         #define         sLowerBound     .16                     ;                       .20
+                      00056         #define         sShiftCtrl      .220            ;                       .230
+                      00057         
+                      00058         
+2007   30D4           00059         __config (_INTRC_OSC_NOCLKOUT & _WDT_OFF & _PWRTE_OFF & _MCLRE_OFF & _CP_OFF & _BOR_OFF & _IESO_
+                            OFF & _FCMEN_OFF)
+                      00060 
+                      00061 
+                      00062         cblock 0x20
+  00000020            00063 Delay1                                          ; unused delay variables
+  00000021            00064 Delay2
+                      00065 
+  00000022            00066 VarTx                                           ; temporary holder for data to transmit
+  00000023            00067 VarRc                                           ; temporary holder for data received
+                      00068 
+  00000024            00069 xRaw                                            ; raw values from tilt sensor, thrown out
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+  00000025            00070 yRaw
+  00000026            00071 xRawH                                           ; high bits from tilt sensor, used
+  00000027            00072 yRawH
+  00000028            00073 xMov                                            ; change in direction, sent to USB
+  00000029            00074 yMov
+                      00075 
+  0000002A            00076 offset                                          ; 0 degrees
+  0000002B            00077 upperBound                                      ; for deadzone (offset + x degs)
+  0000002C            00078 lowerBound                                      ; for deadzone (offsel - x degs)
+  0000002D            00079 shiftCtrl                                       ; for changing sensitivity 
+                      00080 
+                      00081 ;---------------------------------------------------------------------
+                      00082 ;       Mouse Packet Data
+                      00083 ;---------------------------------------------------------------------
+  0000002E            00084 Byte0
+  0000002F            00085 Byte1   
+  00000030            00086 Byte2
+  00000031            00087 Byte3   
+                      00088         endc
+                      00089         
+                      00090         org 0x0
+0000   2???           00091         goto            Start
+                      00092 
+0001                  00093 Start:  
+                      00094         ;-----------------------------------------------------------------
+                      00095         ; SET CONSTANTS
+                      00096         ;-----------------------------------------------------------------
+0001   3053           00097         movlw           .83
+0002   00AA           00098         movwf           offset                                          ; set as middle (this binary out
+                             becomes 0)
+0003   3057           00099         movlw           .87
+0004   00AB           00100         movwf           upperBound                                      ; deadzone - between lowerBound 
+                            and upperBound
+0005   304F           00101         movlw           .79
+0006   00AC           00102         movwf           lowerBound      
+0007   30FA           00103         movlw           .250
+0008   00AD           00104         movwf           shiftCtrl
+                      00105         
+                      00106         
+                      00107         ;-----------------------------------------------------------------
+                      00108         ; SET CPU SPEED                 111 = 8MHz
+                      00109         ;
+                      00110         ;       111 = 8MHz; 110 = 4MHz; 101 = 2MHz; 100 = 1MHz
+                      00111         ;-----------------------------------------------------------------
+0009   1683 1303      00112         banksel         OSCCON                                          
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000B   120F           00113         bcf                     OSCCON, IRCF0                           
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000C   168F           00114         bsf                     OSCCON, IRCF1                           
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000D   170F           00115         bsf                     OSCCON, IRCF2                           
+                      00116         
+                      00117         
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00118         ;-----------------------------------------------------------------
+                      00119         ; SET IO Pins
+                      00120         ;-----------------------------------------------------------------
+000E   1683 1303      00121         banksel         TRISA
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0010   0185           00122         clrf            TRISA
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0011   0186           00123         clrf            TRISB
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0012   0187           00124         clrf            TRISC
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0013   1485           00125         bsf                     TRISA, 1                                        ; Tilt Sensor X
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0014   1405           00126         bsf                     TRISA, 0                                        ; Tilt Sensor Y
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0015   1585           00127         bsf                     TRISA, 3                                        ; Right Button
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0016   1605           00128         bsf                     TRISA, 4                                        ; Left Button
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0017   1685           00129         bsf                     TRISA, 5                                        ; sensitivity toggle
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0018   1407           00130         bsf                     TRISC, 0                                        ; pressure sensor 1
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0019   1487           00131         bsf                     TRISC, 1                                        ; pressure sensor 2
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001A   1606           00132         bsf                     TRISB, 4                                        ; RTS: Request to send f
+                            rom PC
+                      00133         
+                      00134         
+                      00135         ;-----------------------------------------------------------------
+                      00136         ; SET EUSART Comms
+                      00137         ;-----------------------------------------------------------------
+001B   1683 1303      00138         banksel         TRISB
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001D   1686           00139         bsf                     TRISB, 5
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001E   1706           00140         bsf                     TRISB, 6
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+001F   1786           00141         bsf                     TRISB, 7
+                      00142                 
+0020   1683 1303      00143         banksel         TXSTA                                   ; Transmitter Config
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0022   1318           00144         bcf                     TXSTA, TX9                                      ; 9-bit Transmit:       
+                                            Disabled
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0023   1698           00145         bsf                     TXSTA, TXEN                                     ; Transmit Enable:      
+                                            Enabled
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0024   1218           00146         bcf                     TXSTA, SYNC                                     ; EUSART Mode Select: 0=
+                            asynchronous
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0025   1198           00147         bcf                     TXSTA, SENB                                     ; Send Break Character b
+                            it
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0026   1518           00148         bsf                     TXSTA, BRGH                                     ; High Baud Rate Select 
+                            Bit
+                      00149         
+0027   1283 1303      00150         banksel         RCSTA                                   ; Receiver Config
+0029   1798           00151         bsf                     RCSTA, SPEN                                     ; Serial Port Enable
+002A   1318           00152         bcf                     RCSTA, RX9                                      ; 9-bit Receive:        
+                                            Disabled
+002B   1618           00153         bsf                     RCSTA, CREN                                     ; Receive Enable:       
+                                            Enabled
+                      00154         
+002C   1683 1303      00155         banksel         BAUDCTL                                 ; Baud Rate Generator
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+002E   121B           00156         bcf                     BAUDCTL, SCKP                           ; Synchronous Clock Polarity Sel
+                            ect Bit
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+002F   119B           00157         bcf                     BAUDCTL, BRG16                          ; 16-bit baud rate gen:         
+                            0 = 8-bit baud rate
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0030   109B           00158         bcf                     BAUDCTL, WUE                            ; Wake-up Enable:               
+                                    0 = no interrupts
+0031   1683 1303      00159         banksel         SPBRG
+0033   30CF           00160         movlw           .207
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0034   0099           00161         movwf           SPBRG                                           ; 1200 Hz @ 8-bit, high rate
+0035   3000           00162         movlw           .0
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0036   009A           00163         movwf           SPBRGH
+                      00164         
+                      00165         ;-----------------------------------------------------------------
+                      00166         ; INTERRUPTS                                    Turn Everything Off
+                      00167         ;-----------------------------------------------------------------
+0037   1683 1303      00168         banksel         PIE1
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0039   018C           00169         clrf            PIE1
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+003A   018D           00170         clrf            PIE2
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+003B   160C           00171         bsf                     PIE1, TXIE                                      ; Transmitter Interrupt
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+003C   168C           00172         bsf                     PIE1, RCIE                                      ; Receiver Interrupt
+003D   1283 1303      00173         banksel         INTCON
+003F   018B           00174         clrf            INTCON
+0040   170B           00175         bsf                     INTCON, PEIE                            ; Peripheral Interrupts Enabled
+0041   138B           00176         bcf                     INTCON, GIE                                     ; Global Interrupt Disab
+                            led
+                      00177         
+                      00178         ;-----------------------------------------------------------------
+                      00179         ; SET A-D Converter                             Turn Everything Off
+                      00180         ;-----------------------------------------------------------------
+0042   1283 1303      00181         banksel         ADCON0                                          
+0044   019F           00182         clrf            ADCON0                          
+0045   1283 1703      00183         banksel         ANSEL
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0047   019E           00184         clrf            ANSEL
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0048   019F           00185         clrf            ANSELH
+                      00186         
+                      00187         ;-----------------------------------------------------------------
+                      00188         ; CLEAR Ports                                   Turn Everything Off
+                      00189         ;-----------------------------------------------------------------
+0049   1283 1303      00190         banksel         PORTA
+004B   0185           00191         clrf            PORTA
+004C   0187           00192         clrf            PORTC
+004D   0186           00193         clrf            PORTB
+                      00194 
+                      00195         ;-----------------------------------------------------------------
+                      00196         ; Code Pointer
+                      00197         ;-----------------------------------------------------------------
+004E   2???           00198         goto            Main
+                      00199         
+004F                  00200 Main:
+                      00201         
+004F   1A06           00202         btfsc           RTS                                             ; initialize as "Microsoft Mouse
+                            " when asked by PC-side driver
+0050   2???           00203         call            MouseReboot
+                      00204                 
+                      00205         ;-----------|X AXIS|----------------------------------------------
+0051   2???           00206         call            ReadX                                   ; read tilt sensor for raw data
+0052   2???           00207         call            SubtrX                                  ; do math to fix data
+                      00208         ;-----------|Y AXIS|----------------------------------------------
+0053   2???           00209         call            ReadY                                   ; read tilt sensor for raw data
+0054   2???           00210         call            SubtrY                                  ; do math to fix data
+                      00211         
+                      00212         ;-----------|BYTE 0 of PACKET - Direction + Button States|--------
+0055   30C0           00213         movlw           b'11000000'                             ; bit 6&7 synchronizes UART clock
+0056   00AE           00214         movwf           Byte0
+0057   1B28           00215         btfsc           xMov, 6                                 ; move highest two bits of x here
+0058   142E           00216         bsf                     Byte0, 0
+0059   1BA8           00217         btfsc           xMov, 7
+005A   14AE           00218         bsf                     Byte0, 1
+005B   1B29           00219         btfsc           yMov, 6                                 ; move highest two bits of y here
+005C   152E           00220         bsf                     Byte0, 2
+005D   1BA9           00221         btfsc           yMov, 7
+005E   15AE           00222         bsf                     Byte0, 3
+                      00223         
+005F   122E           00224         bcf                     Byte0, 4
+0060   12AE           00225         bcf                     Byte0, 5
+0061   1A05           00226         btfsc           iRightB                                 ; right mouse button
+0062   162E           00227         bsf                     Byte0, 4
+0063   1985           00228         btfsc           iLeftB                                  ; left mouse button
+0064   16AE           00229         bsf                     Byte0, 5
+0065   1887           00230         btfsc           iRightP                                 ; right pressure sensor
+0066   162E           00231         bsf                     Byte0, 4
+0067   1807           00232         btfsc           iLeftP                                  ; left pressure sensor
+0068   16AE           00233         bsf                     Byte0, 5
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00234         ;-----------|BYTE 2 of PACKET - X MAGNITUDE|----------------------
+0069   17A8           00235         bsf                     xMov, 7                                 ; bit 6&7 synchronizes UART cloc
+                            k
+006A   1328           00236         bcf                     xMov, 6
+006B   0828           00237         movf            xMov, w
+006C   00AF           00238         movwf           Byte1
+                      00239         ;-----------|BYTE 3 of PACKET - Y MAGNITUDE|----------------------
+006D   17A9           00240         bsf                     yMov, 7                                 ; bit 6&7 synchronizes UART cloc
+                            k
+006E   1329           00241         bcf                     yMov, 6
+006F   0829           00242         movf            yMov, w
+0070   00B0           00243         movwf           Byte2
+                      00244         
+                      00245         ;-----------|UART TRANSMIT DATA|----------------------------------
+0071   082E           00246         movf            Byte0, w
+0072   00A2           00247         movwf           VarTx
+0073   2???           00248         call            Transmit                                
+0074   082F           00249         movf            Byte1, w
+0075   00A2           00250         movwf           VarTx
+0076   2???           00251         call            Transmit                                
+0077   0830           00252         movf            Byte2, w
+0078   00A2           00253         movwf           VarTx
+0079   2???           00254         call            Transmit                                
+                      00255         
+                      00256         
+                      00257         ;-----------|SENSITIVITY TOGGLE|----------------------------------
+007A   3053           00258                 movlw           nOffset                         ; set values depending on toggle switch
+007B   00AA           00259                 movwf           offset
+007C   3056           00260                 movlw           nUpperBound
+007D   00AB           00261                 movwf           upperBound
+007E   3050           00262                 movlw           nLowerBound
+007F   00AC           00263                 movwf           lowerBound
+0080   30FA           00264                 movlw           nShiftCtrl
+0081   00AD           00265                 movwf           shiftCtrl
+0082   1A85           00266         btfsc           iSensTog
+0083   2???           00267         goto            $+9
+0084   3010           00268                 movlw           sOffset
+0085   00AA           00269                 movwf           offset
+0086   3010           00270                 movlw           sUpperBound
+0087   00AB           00271                 movwf           upperBound
+0088   3010           00272                 movlw           sLowerBound
+0089   00AC           00273                 movwf           lowerBound
+008A   30DC           00274                 movlw           sShiftCtrl
+008B   00AD           00275                 movwf           shiftCtrl       
+                      00276         
+008C   2???           00277         goto            Main                            
+                      00278         ;-----------|INFINITE LOOP|---------------------------------------      
+                      00279         
+008D                  00280 MouseReboot:
+008D   1E06           00281         btfss           RTS                                                     ; restart protocol
+008E   2???           00282         goto            $-1
+008F   2???           00283         call            MouseInit
+0090   0008           00284         return
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE  8
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0091                  00285 MouseInit:
+0091   304D           00286         movlw           'M'                                                     ; emulate Microsoft Mous
+                            e
+0092   00A2           00287         movwf           VarTx
+0093   2???           00288         call            Transmit
+0094   0008           00289         return
+                      00290 
+                      00291 
+                      00292 
+                      00293 
+                      00294 ;-----------------------------------------------------------------
+                      00295 ; Sensor Check                  
+                      00296 ;
+                      00297 ;-----------------------------------------------------------------
+0095                  00298 ReadX:
+                      00299                 ; Buffer
+0095   1885           00300         btfsc           iTiltX                                  ; Wait for Tilt Sensor to go low
+0096   2???           00301         goto            $-1
+0097   1C85           00302         btfss           iTiltX                                  ; Wait for Tilt Sensor to go high
+0098   2???           00303         goto            $-1
+0099   01A4           00304         clrf            xRaw                                    
+009A   01A6           00305         clrf            xRawH
+                      00306                 ; Counter
+009B   0AA4           00307         incf            xRaw, f                                 ; count until the sensor output goes low
+                             (measure duty cycle)
+009C   1903           00308         btfsc           STATUS, Z                               
+009D   2???           00309         call            IncrXHigh                               
+009E   1885           00310         btfsc           iTiltX                                  
+009F   2???           00311         goto            $-4
+00A0   0008           00312         return
+00A1                  00313 IncrXHigh:
+00A1   0AA6           00314         incf            xRawH, f
+00A2   082D           00315         movf            shiftCtrl, w                    ; low bits shift control (to move more significa
+                            nt bits to higher variable)
+00A3   00A4           00316         movwf           xRaw
+00A4   0008           00317         return
+00A5                  00318 SubtrX:
+00A5   01A8           00319         clrf            xMov                                    ; set x change to 0, for use with dead-z
+                            one
+00A6   0826           00320         movf            xRawH, w                                
+00A7   022B           00321         subwf           upperBound, w                   ; test if value > upperBound
+00A8   1803           00322         btfsc           STATUS, C                               ; C = 0 when W > f, aka value > upperBou
+                            nd
+00A9   2???           00323         goto            $+4
+00AA   082B           00324                 movf            upperBound, w
+00AB   0226           00325                 subwf           xRawH, w
+00AC   00A8           00326                 movwf           xMov    
+00AD   082C           00327         movf            lowerBound, w
+00AE   0226           00328         subwf           xRawH, w                                ; test if value < lowerBound
+00AF   1C03           00329         btfss           STATUS, C                               ; C = 0 when W > f, aka value < lowerBou
+                            nd
+00B0   00A8           00330                 movwf           xMov
+00B1   0008           00331         return
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE  9
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00332 
+                      00333 
+                      00334 
+00B2                  00335 ReadY:
+                      00336                 ; Buffer
+00B2   1805           00337         btfsc           iTiltY                                  ; Wait for Tilt Sensor to go low
+00B3   2???           00338         goto            $-1
+00B4   1C05           00339         btfss           iTiltY                                  ; Wait for Tilt Sensor to go high
+00B5   2???           00340         goto            $-1
+00B6   01A5           00341         clrf            yRaw                                    
+00B7   01A7           00342         clrf            yRawH
+                      00343                 ; Counter
+00B8   0AA5           00344         incf            yRaw, f                                 ; count until the sensor output goes low
+                             (measure duty cycle)
+00B9   1903           00345         btfsc           STATUS, Z                               
+00BA   2???           00346         call            IncrYHigh                               
+00BB   1805           00347         btfsc           iTiltY                                  
+00BC   2???           00348         goto            $-4
+00BD   0008           00349         return
+00BE                  00350 IncrYHigh:
+00BE   0AA7           00351         incf            yRawH, f
+00BF   082D           00352         movf            shiftCtrl, w                    ; low bits shift control (to move significant bi
+                            ts to higher variable)
+00C0   00A5           00353         movwf           yRaw
+00C1   0008           00354         return
+00C2                  00355 SubtrY:
+00C2   01A9           00356         clrf            yMov                                    ; set y change to 0, for use with dead-z
+                            one
+00C3   0827           00357         movf            yRawH, w                                
+00C4   022B           00358         subwf           upperBound, w                   ; test if value > upperBound
+00C5   1803           00359         btfsc           STATUS, C                               ; C = 0 when W > f, aka value > upperBou
+                            nd
+00C6   2???           00360         goto            $+4
+00C7   082B           00361                 movf            upperBound, w
+00C8   0227           00362                 subwf           yRawH, w
+00C9   00A9           00363                 movwf           yMov    
+                      00364         
+00CA   082C           00365         movf            lowerBound, w
+00CB   0227           00366         subwf           yRawH, w                                ; test if value < lowerBound
+00CC   1C03           00367         btfss           STATUS, C                               ; C = 0 when W > f, aka value < lowerBou
+                            nd
+00CD   00A9           00368                 movwf           yMov    
+00CE   0008           00369         return
+                      00370 
+                      00371 
+                      00372 ;-----------------------------------------------------------------
+                      00373 ; Polling                               Non-interrupt based status checking
+                      00374 ;
+                      00375 ;-----------------------------------------------------------------
+00CF                  00376 Transmit:
+00CF   1283 1303      00377         banksel         TXREG
+00D1   1E0C           00378         btfss           PIR1, TXIF
+00D2   2???           00379         goto            $-1
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE 10
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00D3   0822           00380         movf            VarTx, w
+00D4   0099           00381         movwf           TXREG
+00D5   0008           00382         return
+                      00383         
+00D6                  00384 Receive:
+00D6   1283 1303      00385         banksel         RCREG
+00D8   081A           00386         movf            RCREG, w
+00D9   00A3           00387         movwf           VarRc
+00DA   0008           00388         return
+00DB                  00389 Delay:
+00DB   0BA0           00390         decfsz          Delay1,f                        
+00DC   2???           00391         goto            Delay                           
+00DD   0BA1           00392         decfsz          Delay2,f                        
+00DE   2???           00393         goto            Delay                                   
+00DF   0008           00394         return
+                      00395 
+30D4                  00396         end
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ABDEN                             00000000
+ABDOVF                            00000007
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000004
+ADCS1                             00000005
+ADCS2                             00000006
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ANS0                              00000000
+ANS1                              00000001
+ANS10                             00000002
+ANS11                             00000003
+ANS2                              00000002
+ANS3                              00000003
+ANS4                              00000004
+ANS5                              00000005
+ANS6                              00000006
+ANS7                              00000007
+ANS8                              00000000
+ANS9                              00000001
+ANSEL                             0000011E
+ANSELH                            0000011F
+BAUDCTL                           0000009B
+BF                                00000000
+BRG0                              00000000
+BRG1                              00000001
+BRG10                             00000002
+BRG11                             00000003
+BRG12                             00000004
+BRG13                             00000005
+BRG14                             00000006
+BRG15                             00000007
+BRG16                             00000003
+BRG2                              00000002
+BRG3                              00000003
+BRG4                              00000004
+BRG5                              00000005
+BRG6                              00000006
+BRG7                              00000007
+BRG8                              00000000
+BRG9                              00000001
+BRGH                              00000002
+Byte0                             0000002E
+Byte1                             0000002F
+Byte2                             00000030
+Byte3                             00000031
+C                                 00000000
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE 12
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+C1CH0                             00000000
+C1CH1                             00000001
+C1IE                              00000005
+C1IF                              00000005
+C1OE                              00000005
+C1ON                              00000007
+C1OUT                             00000006
+C1POL                             00000004
+C1R                               00000002
+C1SEN                             00000005
+C1VREN                            00000007
+C2CH0                             00000000
+C2CH1                             00000001
+C2IE                              00000006
+C2IF                              00000006
+C2OE                              00000005
+C2ON                              00000007
+C2OUT                             00000006
+C2POL                             00000004
+C2R                               00000002
+C2REN                             00000004
+C2SYNC                            00000000
+C2VREN                            00000006
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCPR                              00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CHS0                              00000002
+CHS1                              00000003
+CHS2                              00000004
+CHS3                              00000005
+CKE                               00000006
+CKP                               00000004
+CM1CON0                           00000119
+CM2CON0                           0000011A
+CM2CON1                           0000011B
+CREN                              00000004
+CSRC                              00000007
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+DC1B0                             00000004
+DC1B1                             00000005
+D_A                               00000005
+D_NOT_A                           00000005
+Delay                             000000DB
+Delay1                            00000020
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE 13
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+Delay2                            00000021
+ECCPAS                            0000001D
+ECCPAS0                           00000004
+ECCPAS1                           00000005
+ECCPAS2                           00000006
+ECCPASE                           00000007
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDAT                             0000010C
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GIE                               00000007
+GO                                00000001
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+HTS                               00000002
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IOC                               00000096
+IOC0                              00000000
+IOC1                              00000001
+IOC2                              00000002
+IOC3                              00000003
+IOC4                              00000004
+IOC5                              00000005
+IOCA                              00000096
+IOCA0                             00000000
+IOCA1                             00000001
+IOCA2                             00000002
+IOCA3                             00000003
+IOCA4                             00000004
+IOCA5                             00000005
+IOCB                              00000116
+IOCB4                             00000004
+IOCB5                             00000005
+IOCB6                             00000006
+IOCB7                             00000007
+IRCF0                             00000004
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE 14
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+IRCF1                             00000005
+IRCF2                             00000006
+IRP                               00000007
+IncrXHigh                         000000A1
+IncrYHigh                         000000BE
+LTS                               00000001
+MC1OUT                            00000007
+MC2OUT                            00000006
+MSK                               00000093
+MSK0                              00000000
+MSK1                              00000001
+MSK2                              00000002
+MSK3                              00000003
+MSK4                              00000004
+MSK5                              00000005
+MSK6                              00000006
+MSK7                              00000007
+Main                              0000004F
+MouseInit                         00000091
+MouseReboot                       0000008D
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BOR                           00000000
+NOT_DONE                          00000001
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RABPU                         00000007
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OERR                              00000001
+OPTION_REG                        00000081
+OSCCON                            0000008F
+OSCTUNE                           00000090
+OSFIE                             00000007
+OSFIF                             00000007
+OSTS                              00000003
+P                                 00000004
+P1M0                              00000006
+P1M1                              00000007
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PDC0                              00000000
+PDC1                              00000001
+PDC2                              00000002
+PDC3                              00000003
+PDC4                              00000004
+PDC5                              00000005
+PDC6                              00000006
+PEIE                              00000006
+PIE1                              0000008C
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE 15
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PR2                               00000092
+PRSEN                             00000007
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSSAC0                            00000002
+PSSAC1                            00000003
+PSSBD0                            00000000
+PSSBD1                            00000001
+PSTRCON                           0000019D
+PULSR                             00000002
+PULSS                             00000003
+PWM1CON                           0000001C
+R                                 00000002
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RABIE                             00000003
+RABIF                             00000000
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RC0                               00000000
+RC1                               00000001
+RC2                               00000002
+RC3                               00000003
+RC4                               00000004
+RC5                               00000005
+RC6                               00000006
+RC7                               00000007
+RCIDL                             00000006
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+READ_WRITE                        00000002
+RP0                               00000005
+RP1                               00000006
+RTS                               PORTB,4
+RX9                               00000006
+RX9D                              00000000
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE 16
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+R_NOT_W                           00000002
+R_W                               00000002
+ReadX                             00000095
+ReadY                             000000B2
+Receive                           000000D6
+S                                 00000003
+SBOREN                            00000004
+SCKP                              00000004
+SCS                               00000000
+SENB                              00000003
+SENDB                             00000003
+SMP                               00000007
+SPBRG                             00000099
+SPBRGH                            0000009A
+SPEN                              00000007
+SR0                               00000006
+SR1                               00000007
+SRCON                             0000019E
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPMSK                            00000093
+SSPOV                             00000006
+SSPSTAT                           00000094
+STATUS                            00000003
+STRA                              00000000
+STRB                              00000001
+STRC                              00000002
+STRD                              00000003
+STRSYNC                           00000004
+SWDTEN                            00000000
+SYNC                              00000004
+Start                             00000001
+SubtrX                            000000A5
+SubtrY                            000000C2
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1GINV                            00000007
+T1GSS                             00000001
+T1IE                              00000000
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE 17
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+T1IF                              00000000
+T1OSCEN                           00000003
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+T2IE                              00000001
+T2IF                              00000001
+TMR0                              00000001
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1GE                            00000006
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISB                             00000086
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRISC                             00000087
+TRISC0                            00000000
+TRISC1                            00000001
+TRISC2                            00000002
+TRISC3                            00000003
+TRISC4                            00000004
+TRISC5                            00000005
+TRISC6                            00000006
+TRISC7                            00000007
+TRMT                              00000001
+TUN0                              00000000
+TUN1                              00000001
+TUN2                              00000002
+TUN3                              00000003
+TUN4                              00000004
+TX9                               00000006
+TX9D                              00000000
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE 18
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+Transmit                          000000CF
+UA                                00000001
+ULPWUE                            00000005
+VCFG                              00000006
+VP6EN                             00000004
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             00000118
+VRR                               00000005
+VarRc                             00000023
+VarTx                             00000022
+W                                 00000000
+WCOL                              00000007
+WDTCON                            00000097
+WDTPS0                            00000001
+WDTPS1                            00000002
+WDTPS2                            00000003
+WDTPS3                            00000004
+WPU                               00000095
+WPU0                              00000000
+WPU1                              00000001
+WPU2                              00000002
+WPU4                              00000004
+WPU5                              00000005
+WPUA                              00000095
+WPUA0                             00000000
+WPUA1                             00000001
+WPUA2                             00000002
+WPUA4                             00000004
+WPUA5                             00000005
+WPUB                              00000115
+WPUB4                             00000004
+WPUB5                             00000005
+WPUB6                             00000006
+WPUB7                             00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+WUE                               00000001
+Z                                 00000002
+_.org_0_0083                      00000083
+_.org_0_008E                      0000008E
+_.org_0_0096                      00000096
+_.org_0_0098                      00000098
+_.org_0_009F                      0000009F
+_.org_0_00A9                      000000A9
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE 19
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_.org_0_00B3                      000000B3
+_.org_0_00B5                      000000B5
+_.org_0_00BC                      000000BC
+_.org_0_00C6                      000000C6
+_.org_0_00D2                      000000D2
+_BOD_NSLEEP                       00003EFF
+_BOD_OFF                          00003CFF
+_BOD_ON                           00003FFF
+_BOD_SBODEN                       00003DFF
+_BOREN_NSLEEP                     00003EFF
+_BOREN_OFF                        00003CFF
+_BOREN_ON                         00003FFF
+_BOREN_SBODEN                     00003DFF
+_BOR_NSLEEP                       00003EFF
+_BOR_OFF                          00003CFF
+_BOR_ON                           00003FFF
+_BOR_SBODEN                       00003DFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003F7F
+_CP_OFF                           00003FFF
+_CP_ON                            00003FBF
+_DEVID1                           00002006
+_EC_OSC                           00003FFB
+_EXTRC                            00003FFF
+_EXTRCIO                          00003FFE
+_EXTRC_OSC_CLKOUT                 00003FFF
+_EXTRC_OSC_NOCLKOUT               00003FFE
+_FCMEN_OFF                        000037FF
+_FCMEN_ON                         00003FFF
+_FOSC_EC                          00003FFB
+_FOSC_EXTRCCLK                    00003FFF
+_FOSC_EXTRCIO                     00003FFE
+_FOSC_HS                          00003FFA
+_FOSC_INTRCCLK                    00003FFD
+_FOSC_INTRCIO                     00003FFC
+_FOSC_LP                          00003FF8
+_FOSC_XT                          00003FF9
+_HS_OSC                           00003FFA
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_IESO_OFF                         00003BFF
+_IESO_ON                          00003FFF
+_INTOSC                           00003FFD
+_INTOSCIO                         00003FFC
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FF8
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+MPASM  5.51     AAA TILT MOUSE RELEASE1,2.ASM   6-14-2014  18:12:36         PAGE 20
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_PWRTE_ON                         00003FEF
+_WDTE_OFF                         00003FF7
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FF7
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FF9
+__16F690                          00000001
+__DEBUG                           1
+iLeftB                            PORTA,3
+iLeftP                            PORTC,0
+iRightB                           PORTA,4
+iRightP                           PORTC,1
+iSensTog                          PORTA,5
+iTiltX                            PORTA,1
+iTiltY                            PORTA,0
+lowerBound                        0000002C
+nLowerBound                       .80
+nOffset                           .83
+nShiftCtrl                        .250
+nUpperBound                       .86
+offset                            0000002A
+sLowerBound                       .16
+sOffset                           .16
+sShiftCtrl                        .220
+sUpperBound                       .16
+shiftCtrl                         0000002D
+upperBound                        0000002B
+xMov                              00000028
+xRaw                              00000024
+xRawH                             00000026
+yMov                              00000029
+yRaw                              00000025
+yRawH                             00000027
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :    33 reported,     0 suppressed
+
+

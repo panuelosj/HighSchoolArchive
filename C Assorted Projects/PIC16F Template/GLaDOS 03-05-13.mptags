@@ -1,0 +1,20 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.5.4	//
+!_TAG_REVISION_NAME	MCHPTags	//
+!_TAG_REVISION_VERSION	6.0.1	//
+FCMEN_OFF	C:\Users\User\Documents\Jonathan\J Panu\test button 03-06-13.c	13;"	v	line:13
+LED0::RC0	C:\Users\User\Documents\Jonathan\J Panu\test button 03-06-13.c	21;"	d	line:21	file:
+buttonL::RA5	C:\Users\User\Documents\Jonathan\J Panu\test button 03-06-13.c	23;"	d	line:23	file:
+buttonR::RA4	C:\Users\User\Documents\Jonathan\J Panu\test button 03-06-13.c	24;"	d	line:24	file:
+i	C:\Users\User\Documents\Jonathan\J Panu\test button 03-06-13.c	32;"	v	line:32
+init_hardware	C:\Users\User\Documents\Jonathan\J Panu\test button 03-06-13.c	37;"	p	line:37	file:	signature:(void)
+init_hardware	C:\Users\User\Documents\Jonathan\J Panu\test button 03-06-13.c	96;"	f	line:96	signature:(void)
+ledValue	C:\Users\User\Documents\Jonathan\J Panu\test button 03-06-13.c	31;"	v	line:31
+main	C:\Users\User\Documents\Jonathan\J Panu\test button 03-06-13.c	43;"	f	line:43	signature:(void)
+off::0	C:\Users\User\Documents\Jonathan\J Panu\test button 03-06-13.c	19;"	d	line:19	file:
+on::1	C:\Users\User\Documents\Jonathan\J Panu\test button 03-06-13.c	18;"	d	line:18	file:
+sec::1000000	C:\Users\User\Documents\Jonathan\J Panu\test button 03-06-13.c	26;"	d	line:26	file:
